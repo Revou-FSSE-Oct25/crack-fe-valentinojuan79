@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+
+  --color-stone-25:  #FDFCFB;
+  --color-stone-50:  #F8F6F3;
+  --color-stone-100: #EDE9E4;
+  --color-stone-200: #DDD7CF;
+  --color-stone-300: #C2B9AF;
+  --color-stone-500: #7A6E64;
+  --color-stone-700: #3D342D;
+  --color-stone-900: #1A1410;
+
+  --color-accent-50:  #FAF5EE;
+  --color-accent-200: #E4CFA8;
+  --color-accent-500: #B07D3E;
+  --color-accent-600: #946A30;
+  --color-accent-700: #7A5425;
+
+  --shadow-subtle: 0 1px 3px 0 rgb(26 20 16 / 0.04), 0 4px 12px 0 rgb(26 20 16 / 0.04);
+  --shadow-card:   0 2px 8px 0 rgb(26 20 16 / 0.05), 0 12px 32px 0 rgb(26 20 16 / 0.06);
+  --shadow-lifted: 0 8px 24px 0 rgb(26 20 16 / 0.08), 0 24px 48px 0 rgb(26 20 16 / 0.08);
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-stone-25);
+    color: var(--color-stone-900);
+    -webkit-font-smoothing: antialiased;
+    font-weight: 400;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: var(--color-accent-200);
+    color: var(--color-stone-900);
+  }
+}
+
+@layer utilities {
+  .font-display     { font-family: var(--font-display); }
+  .shadow-subtle    { box-shadow: var(--shadow-subtle); }
+  .shadow-card      { box-shadow: var(--shadow-card); }
+  .shadow-lifted    { box-shadow: var(--shadow-lifted); }
+  .animate-fade-up  { animation: fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-fade-in  { animation: fade-in 0.4s ease-out both; }
+  .delay-75  { animation-delay: 75ms;  }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-225 { animation-delay: 225ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+}
