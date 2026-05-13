@@ -1,19 +1,22 @@
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata = {
-  title: "Solvio — Property Stewardship",
-  description: "Standar baru dalam pemeliharaan properti premium.",
+  title: "Solvio — Servis Rumah Profesional",
+  description: "Hubungkan dengan teknisi rumahan terpercaya, cepat, dan transparan.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className="scroll-smooth">
       <body className="bg-[#FDFCFB] text-[#1A1410] antialiased">
-        <Navbar />
-        {children}
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

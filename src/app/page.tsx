@@ -90,9 +90,9 @@ export default function HomePage() {
                 Solvio menghubungkan Anda dengan teknisi rumahan profesional — cepat, transparan, dan terpercaya untuk semua kebutuhan perawatan rumah Anda.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-start gap-4 animate-fade-up delay-150">
-                <Button size="lg">Mulai Reservasi</Button>
+                <Link href="/services"><Button size="lg">Lihat Layanan</Button></Link>
                 <Link
-                  href="/daftar-teknisi"
+                  href="/register"
                   className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-stone-900 text-stone-900 text-[14px] font-semibold rounded-full hover:bg-stone-900 hover:text-white transition-all duration-300"
                 >
                   Daftar sebagai Teknisi
@@ -133,7 +133,7 @@ export default function HomePage() {
               </h2>
             </div>
             <Link
-              href="/layanan"
+              href="/services"
               className="inline-flex items-center gap-2 text-[13px] font-semibold text-stone-900 border border-stone-200 px-5 py-2.5 rounded-full hover:border-stone-900 hover:bg-white transition-all duration-200 self-start md:self-auto"
             >
               Lihat Semua Layanan
@@ -143,7 +143,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {POPULAR_SERVICES.map((s, i) => (
-              <Link key={i} href={`/layanan/${s.num}`} className="group block">
+              <Link key={i} href="/services" className="group block">
                 <div className="bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-[0_12px_40px_rgb(26,20,16,0.09)] hover:-translate-y-1 transition-all duration-400 h-full flex flex-col">
 
                   {/* Icon area */}
@@ -315,12 +315,12 @@ export default function HomePage() {
                 Bergabung dengan 2.400+ pelanggan yang sudah mempercayakan perawatan rumah mereka kepada Solvio.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3">
-                <Link href="/reservasi">
+                <Link href="/bookings">
                   <button className="px-9 py-4 bg-white text-stone-900 text-[15px] font-semibold rounded-full hover:bg-accent-500 hover:text-white transition-all duration-300">
                     Mulai Reservasi
                   </button>
                 </Link>
-                <Link href="/daftar-teknisi">
+                <Link href="/register">
                   <button className="px-9 py-4 border border-white/15 text-white/70 text-[15px] font-medium rounded-full hover:border-white/40 hover:text-white transition-all duration-300">
                     Daftar sebagai Teknisi
                   </button>
