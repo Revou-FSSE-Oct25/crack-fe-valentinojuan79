@@ -1,8 +1,9 @@
+import React from "react";
+
 export const Footer: React.FC = () => (
   <footer className="bg-[#1A1410] text-white pt-20 pb-10 px-8">
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-white/10">
-        {/* Brand col */}
         <div className="md:col-span-5 space-y-5">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-[#B07D3E] flex items-center justify-center">
@@ -15,7 +16,6 @@ export const Footer: React.FC = () => (
           </p>
         </div>
 
-        {/* Links */}
         <div className="md:col-span-3">
           <p className="text-[10px] uppercase tracking-[0.12em] text-white/30 font-semibold mb-5">Layanan</p>
           <div className="flex flex-col gap-3">

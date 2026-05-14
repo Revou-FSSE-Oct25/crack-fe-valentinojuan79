@@ -21,8 +21,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(form.email, form.password);
-      // Redirect berdasarkan role — auth-context nyimpan user di state
-      // Tapi kita baca dari localStorage karena state baru update di render berikutnya
       const stored = localStorage.getItem("user");
       if (stored) {
         const u = JSON.parse(stored);
@@ -41,16 +39,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
       <div className="hidden lg:flex lg:w-[50%] bg-[#1A1410] flex-col justify-between p-14 relative overflow-hidden">
         <div className="absolute top-[-80px] right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[-60px] w-[320px] h-[320px] rounded-full bg-[#B07D3E] opacity-[0.05] blur-[70px] pointer-events-none" />
-        <Link href="/" className="flex items-center gap-2.5 w-fit">
-          <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-white" />
-          </span>
-          <span className="text-[18px] font-semibold tracking-[-0.02em] text-white">Solvio</span>
-        </Link>
         <div className="space-y-10">
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-[#B07D3E] font-semibold mb-5">Selamat Datang Kembali</p>
@@ -78,13 +69,12 @@ export default function LoginPage() {
         </div>
         <div className="border-t border-white/10 pt-8">
           <p className="text-[14px] text-white/35 font-light italic leading-relaxed">
-            "AC saya sudah bersih kembali, teknisinya datang tepat waktu dan ramah."
+            &ldquo;AC saya sudah bersih kembali, teknisinya datang tepat waktu dan ramah.&rdquo;
           </p>
           <p className="text-[12px] text-white/25 mt-3 font-medium">— Siska A., Pelanggan Solvio</p>
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 py-16 bg-[#FDFCFB]">
         <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">

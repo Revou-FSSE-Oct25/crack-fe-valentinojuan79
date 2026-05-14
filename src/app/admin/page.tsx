@@ -30,13 +30,11 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
 
 type Tab = "bookings" | "services" | "categories";
 
-// Extended technician type from /users/technicians
 interface Technician extends User {
   assignedTasks?: { id: string }[];
   specialities?: string;
 }
 
-// ─── Booking Detail Drawer ───────────────────────────────────────────────────
 interface BookingDrawerProps {
   booking: Booking;
   technicians: Technician[];
@@ -53,7 +51,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
   const customerCity = b.user?.city;
   const bookingCategory = b.services?.category?.category_name || "";
 
-  // Filter by specialities matching booking category, fallback to all if none match
   const filteredTechs = bookingCategory
     ? technicians.filter((t) => {
         if (!t.specialities) return false;
@@ -65,7 +62,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
   const techsToShow = filteredTechs.length > 0 ? filteredTechs : technicians;
   const isFiltered = filteredTechs.length > 0 && filteredTechs.length < technicians.length;
 
-  // Sort: same city first
   const sortedTechs = [...techsToShow].sort((a, b) => {
     if (customerCity && a.city === customerCity && b.city !== customerCity) return -1;
     if (customerCity && b.city === customerCity && a.city !== customerCity) return 1;
@@ -78,12 +74,9 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* backdrop */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
-      {/* drawer */}
       <div className="relative ml-auto w-full max-w-lg bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
-        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-[#F0EDE9] px-6 py-4 flex items-center justify-between z-10">
           <div>
             <p className="text-[11px] text-[#B07D3E] font-semibold uppercase tracking-widest">
@@ -101,12 +94,10 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
 
         <div className="flex-1 px-6 py-6 space-y-6">
 
-          {/* Status badge */}
           <span className={`inline-flex text-[12px] font-semibold px-3 py-1 rounded-full border ${STATUS_COLOR[b.status]}`}>
             {STATUS_LABEL[b.status]}
           </span>
 
-          {/* Customer Info */}
           <section>
             <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Pelanggan</p>
             <div className="bg-[#F8F6F3] rounded-2xl p-4 space-y-3 border border-[#EDE9E4]">
@@ -136,7 +127,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
             </div>
           </section>
 
-          {/* Booking Info */}
           <section>
             <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Detail Reservasi</p>
             <div className="bg-[#F8F6F3] rounded-2xl p-4 space-y-3 border border-[#EDE9E4]">
@@ -149,7 +139,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
             </div>
           </section>
 
-          {/* Payment Info */}
           <section>
             <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Pembayaran</p>
             <div className="bg-[#F8F6F3] rounded-2xl p-4 space-y-3 border border-[#EDE9E4]">
@@ -175,7 +164,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
             </div>
           </section>
 
-          {/* Assign Teknisi */}
           <section>
             <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">
               Assign Teknisi
@@ -278,7 +266,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
             )}
           </section>
 
-          {/* Update Status */}
           {!isFinished && (
             <section>
               <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Update Status</p>
@@ -302,7 +289,6 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
           )}
         </div>
 
-        {/* Footer actions */}
         {!isFinished && (
           <div className="sticky bottom-0 bg-white border-t border-[#F0EDE9] px-6 py-4 flex gap-3">
             <Button variant="outline" fullWidth onClick={onClose}>Tutup</Button>
@@ -335,7 +321,6 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-// ─── Main Admin Page ─────────────────────────────────────────────────────────
 export default function AdminPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -378,12 +363,12 @@ export default function AdminPage() {
   );
 }
 
-// ─── Admin Bookings ───────────────────────────────────────────────────────────
 function AdminBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [updating, setUpdating] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -409,7 +394,6 @@ function AdminBookings() {
     try {
       await api.patch(`/bookings/${bookingId}/status`, { status, provider_id });
       await load();
-      // Refresh selected booking
       setSelectedBooking((prev) =>
         prev?.id === bookingId
           ? { ...prev, status, provider_id: provider_id ?? prev.provider_id }
@@ -423,9 +407,17 @@ function AdminBookings() {
     }
   }
 
-  const displayed = filterStatus === "all"
-    ? bookings
-    : bookings.filter((b) => b.status === filterStatus);
+  const displayed = bookings
+    .filter((b) => filterStatus === "all" || b.status === filterStatus)
+    .filter((b) => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        b.user?.full_name?.toLowerCase().includes(q) ||
+        b.user?.email?.toLowerCase().includes(q) ||
+        b.services?.services_name?.toLowerCase().includes(q)
+      );
+    });
 
   const stats = {
     total: bookings.length,
@@ -442,7 +434,6 @@ function AdminBookings() {
 
   return (
     <div>
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: "Total", value: stats.total, color: "text-[#1A1410]" },
@@ -457,7 +448,22 @@ function AdminBookings() {
         ))}
       </div>
 
-      {/* Filter pills */}
+      <div className="flex gap-2 flex-wrap mb-4">
+        <div className="relative flex-1 min-w-[220px]">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C2B9AF]" width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.4"/>
+            <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Cari nama pelanggan atau layanan…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-[#DDD7CF] rounded-xl text-[13px] text-[#1A1410] placeholder:text-[#C2B9AF] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white"
+          />
+        </div>
+      </div>
+
       <div className="flex gap-2 flex-wrap mb-6">
         {["all", ...STATUS_OPTIONS].map((s) => (
           <button
@@ -474,7 +480,6 @@ function AdminBookings() {
         ))}
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -542,7 +547,6 @@ function AdminBookings() {
         </div>
       </div>
 
-      {/* Detail Drawer */}
       {selectedBooking && (
         <BookingDrawer
           booking={selectedBooking}
@@ -556,7 +560,6 @@ function AdminBookings() {
   );
 }
 
-// ─── Admin Services (sama seperti sebelumnya) ─────────────────────────────────
 function AdminServices() {
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -696,7 +699,6 @@ function AdminServices() {
   );
 }
 
-// ─── Admin Categories ─────────────────────────────────────────────────────────
 function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

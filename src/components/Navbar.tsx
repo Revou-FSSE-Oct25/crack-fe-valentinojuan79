@@ -2,13 +2,18 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+
+const SOLID_NAV_PAGES = ["/login", "/register", "/profile", "/dashboard", "/admin", "/technician", "/bookings", "/services", "/about"];
 
 export const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isSolidPage = SOLID_NAV_PAGES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  const isSolid = scrolled || isSolidPage;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -30,14 +35,13 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        isSolid
           ? "bg-white/95 backdrop-blur-md border-b border-[#EDE9E4] shadow-[0_1px_12px_rgb(26,20,16,0.06)]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-8 h-[72px] flex items-center justify-between">
-        {/* Logo */}
         <div className="flex items-center gap-12">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center">
@@ -48,15 +52,14 @@ export const Navbar: React.FC = () => {
 
           <div className="hidden md:flex items-center gap-8">
             <Link href="/services" className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide">
-              Services
+              Layanan
             </Link>
             <Link href="/about" className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide">
-              About
+              Tentang
             </Link>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2">
           {user ? (
             <>

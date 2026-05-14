@@ -12,7 +12,7 @@ function formatPrice(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
-// ─── Payment Detail Components ──────────────────────────────────────────────
+
 function VirtualAccountDetail({ bank, amount }: { bank: string; amount: number }) {
   const vaNumbers: Record<string, string> = {
     "BCA": "8008 0012 3456 789",
@@ -107,7 +107,7 @@ function CashDetail({ amount }: { amount: number }) {
   );
 }
 
-// ─── Success Screen ──────────────────────────────────────────────────────────
+
 function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => void }) {
   const payMethod = booking.payment?.method || "";
   const amount = booking.total_price;
@@ -145,7 +145,7 @@ function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => 
   );
 }
 
-// ─── Main Form ───────────────────────────────────────────────────────────────
+
 const PAYMENT_METHODS = [
   { id: "VA BCA", label: "VA BCA", icon: "🏦", desc: "Virtual Account BCA" },
   { id: "VA Mandiri", label: "VA Mandiri", icon: "🏦", desc: "Virtual Account Mandiri" },

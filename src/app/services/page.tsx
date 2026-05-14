@@ -23,7 +23,7 @@ function getCatIcon(name: string) {
   return "🔧";
 }
 
-// ─── Service Detail Popup ───────────────────────────────────────────────────
+
 interface ServiceModalProps {
   service: Service;
   onClose: () => void;
@@ -132,7 +132,7 @@ function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
+
 export default function LayananPage() {
   const { user } = useAuth();
   const router = useRouter();

@@ -61,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "Login gagal");
 
-    // BE returns: { message, access_token, user }
     localStorage.setItem("access_token", json.access_token);
     localStorage.setItem("user", JSON.stringify(json.user));
     setToken(json.access_token);

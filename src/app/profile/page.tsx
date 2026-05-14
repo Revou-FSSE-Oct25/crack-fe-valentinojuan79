@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { Button, Input, Card } from "@/components/ui";
 
-// ─── Icons (inline SVG, no extra deps) ───────────────────────────────────────
+
 const IconUser = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -58,7 +58,7 @@ const IconShield = () => (
   </svg>
 );
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface ProfileData {
   id: string;
   full_name: string;
@@ -82,7 +82,7 @@ interface FormState {
   specialities: string;
 }
 
-// ─── Kota-kota Indonesia (untuk dropdown) ─────────────────────────────────────
+
 const CITIES = [
   "Jakarta", "Surabaya", "Bandung", "Medan", "Semarang",
   "Yogyakarta", "Palembang", "Tangerang", "Depok", "Bekasi",
@@ -95,7 +95,7 @@ const SPECIALITIES_OPTIONS = [
   "Cat & Dinding", "Atap & Genteng", "Pest Control", "Kebersihan", "Lainnya",
 ];
 
-// ─── Avatar initials ──────────────────────────────────────────────────────────
+
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -105,7 +105,7 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+
 export default function ProfilePage() {
   const { user: authUser, logout } = useAuth();
   const router = useRouter();
@@ -128,7 +128,7 @@ export default function ProfilePage() {
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
   const successTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Load profile on mount
+
   useEffect(() => {
     if (!authUser) { router.push("/login"); return; }
     loadProfile();
@@ -214,7 +214,7 @@ export default function ProfilePage() {
     }
   }
 
-  // ── Loading state ─────────────────────────────────────────────────────────
+
   if (loading) {
     return (
       <div className="min-h-screen pt-[88px] flex items-center justify-center bg-[#FAF9F7]">
@@ -233,7 +233,7 @@ export default function ProfilePage() {
   const filledCount = completionFields.filter((f) => !!form[f as keyof FormState]).length;
   const completionPct = Math.round((filledCount / completionFields.length) * 100);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-[#FAF9F7] pt-[88px] pb-20">
       <div className="max-w-2xl mx-auto px-4">

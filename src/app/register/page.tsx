@@ -88,7 +88,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
       <div className="hidden lg:flex lg:w-[50%] bg-stone-900 flex-col justify-between p-14 relative overflow-hidden">
         <div className="absolute -top-20 right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
         <Link href="/" className="flex items-center gap-2.5 w-fit">
@@ -130,7 +129,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 py-16 bg-[#FDFCFB]">
         <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
@@ -145,7 +143,6 @@ export default function RegisterPage() {
             <p className="text-[14px] text-[#7A6E64] font-light">Already have an account?{" "}<Link href="/login" className="text-[#B07D3E] font-medium hover:underline underline-offset-4">Sign in here</Link></p>
           </div>
 
-          {/* Step indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
               {STEPS.map((s, i) => (
@@ -171,7 +168,6 @@ export default function RegisterPage() {
 
           <form onSubmit={handleNext} className="space-y-5">
 
-            {/* Step 0: Account Type */}
             {step === 0 && (
               <div className="space-y-5">
                 <p className="text-[13px] text-[#7A6E64] font-light">Choose the type of account you want to create:</p>
@@ -195,7 +191,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Step 1: Personal Info — CUSTOMER */}
             {step === 1 && role === "CUSTOMER" && (
               <div className="space-y-4">
                 <Input label="Full Name" type="text" placeholder="Your full name" fullWidth value={customerForm.name}
@@ -205,7 +200,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Step 1: Personal Info — TECHNICIAN */}
             {step === 1 && role === "TECHNICIAN" && (
               <div className="space-y-4">
                 <Input label="Full Name" type="text" placeholder="Your full name" fullWidth value={techForm.name}
@@ -223,7 +217,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Step 2: Security */}
             {step === 2 && (
               <div className="space-y-4">
                 {(() => {
@@ -258,7 +251,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Nav buttons */}
             <div className={`flex gap-3 pt-2 ${step > 0 ? "flex-row" : ""}`}>
               {step > 0 && (
                 <button type="button" onClick={() => { setStep(step - 1); setError(""); }}

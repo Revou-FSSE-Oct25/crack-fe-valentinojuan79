@@ -5,10 +5,7 @@ function getToken(): string | null {
   return localStorage.getItem("access_token");
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -23,7 +20,6 @@ async function request<T>(
     throw new Error(json.message || "Terjadi kesalahan");
   }
 
-  // BE kadang return { data: [...] } atau { message, data } — unwrap otomatis
   if (json && typeof json === "object" && "data" in json) {
     return json.data as T;
   }
