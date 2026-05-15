@@ -78,12 +78,10 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#1A1410] flex-col justify-between p-14 relative overflow-hidden">
         <div className="absolute top-[-80px] right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[-60px] w-[320px] h-[320px] rounded-full bg-[#B07D3E] opacity-[0.05] blur-[70px] pointer-events-none" />
 
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 w-fit">
           <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center">
             <span className="w-2.5 h-2.5 rounded-full bg-white" />
@@ -120,9 +118,7 @@ function LoginForm() {
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 py-16 bg-[#FDFCFB]">
-        {/* Mobile logo */}
         <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
             <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center">

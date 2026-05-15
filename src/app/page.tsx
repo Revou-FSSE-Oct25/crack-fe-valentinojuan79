@@ -97,7 +97,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: custom SVG illustration (undraw style, under construction) */}
             <div className="relative flex items-center justify-center animate-fade-up delay-150">
               <div className="absolute w-90 h-90 rounded-full bg-stone-100 opacity-50" />
               <img src="/hero.svg" alt="Ilustrasi Servis Rumah" className="relative w-full max-w-sm" />
@@ -118,7 +117,6 @@ export default function HomePage() {
       </section>
 
 
-      {/* LAYANAN POPULER */}
       <section className="min-h-screen flex flex-col justify-center py-24 px-8 bg-stone-50">
         <div className="max-w-7xl mx-auto w-full">
 
@@ -190,7 +188,6 @@ export default function HomePage() {
       </section>
 
 
-      {/* MENGAPA SOLVIO */}
       <section className="min-h-screen flex flex-col justify-center py-24 px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -224,7 +221,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Laporan Kunjungan card */}
             <div className="relative h-110 lg:h-125">
               <div className="absolute inset-x-10 top-10 bottom-0 bg-stone-50rounded-2xl border border-stone-100" />
               <div className="absolute inset-x-5 top-5 bottom-5 bg-white rounded-2xl border border-stone-100 shadow-[0_4px_24px_rgb(26,20,16,0.04)]" />
@@ -260,8 +256,6 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      {/* REVIEWS */}
       <section className="min-h-screen flex flex-col justify-center py-24 px-8 bg-stone-50">
         <div className="max-w-7xl mx-auto w-full">
           <div className="mb-14">
@@ -295,8 +289,6 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      {/* CTA */}
       <section className="min-h-screen flex flex-col justify-center py-24 px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="bg-stone-900 rounded-3xl px-12 md:px-20 py-24 relative overflow-hidden">

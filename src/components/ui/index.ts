@@ -1,13 +1,5 @@
 export { Button } from "./Button";
-export { Card } from "./Card";
 export { Badge } from "./Badge";
 export { Avatar } from "./Avatar";
 export { Input } from "./Input";
 export { Checkbox } from "./Checkbox";
-export { Modal } from "./Modal";
-export { Select } from "./Select";
-export { Skeleton } from "./Skeleton";
-export { Tabs } from "./Tabs";
-export { TextArea } from "./TextArea";
-export { Divider } from "./Divider";
-export { Table } from "./Table";

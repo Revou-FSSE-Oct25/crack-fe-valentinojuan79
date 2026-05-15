@@ -120,9 +120,9 @@ function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => 
 
       <div className="text-left mb-8">
         <p className="text-[12px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Instruksi Pembayaran</p>
-        {payMethod.startsWith("VA ") ? (
-          <VirtualAccountDetail bank={payMethod.replace("VA ", "")} amount={amount} />
-        ) : payMethod === "QRIS" ? (
+        {payMethod.startsWith("VA_") ? (
+          <VirtualAccountDetail bank={payMethod.replace("VA_", "")} amount={amount} />
+        ) : payMethod === "QRIS" || payMethod === "GOPAY" ? (
           <QRISDetail amount={amount} />
         ) : (
           <CashDetail amount={amount} />
@@ -142,11 +142,13 @@ function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => 
 }
 
 const PAYMENT_METHODS = [
-  { id: "VA BCA", label: "VA BCA", icon: "🏦", desc: "Virtual Account BCA" },
-  { id: "VA Mandiri", label: "VA Mandiri", icon: "🏦", desc: "Virtual Account Mandiri" },
-  { id: "VA BNI", label: "VA BNI", icon: "🏦", desc: "Virtual Account BNI" },
+  { id: "VA_BCA", label: "VA BCA", icon: "🏦", desc: "Virtual Account BCA" },
+  { id: "VA_MANDIRI", label: "VA Mandiri", icon: "🏦", desc: "Virtual Account Mandiri" },
+  { id: "VA_BNI", label: "VA BNI", icon: "🏦", desc: "Virtual Account BNI" },
+  { id: "VA_BRI", label: "VA BRI", icon: "🏦", desc: "Virtual Account BRI" },
   { id: "QRIS", label: "QRIS", icon: "📱", desc: "Semua dompet digital" },
-  { id: "Tunai", label: "Tunai", icon: "💵", desc: "Bayar ke teknisi" },
+  { id: "GOPAY", label: "GoPay", icon: "💚", desc: "Dompet digital GoPay" },
+  { id: "TUNAI", label: "Tunai", icon: "💵", desc: "Bayar ke teknisi" },
 ];
 
 const PROVINCE_CITY: Record<string, string[]> = {
@@ -198,6 +200,7 @@ function ReservasiForm() {
   const [selectedVariant, setSelectedVariant] = useState<ServiceVariant | null>(null);
   const [schedule, setSchedule] = useState("");
   const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
@@ -206,11 +209,12 @@ function ReservasiForm() {
   const [error, setError] = useState("");
   const [successBooking, setSuccessBooking] = useState<Booking | null>(null);
 
-  const load = useCallback(async (userAddress: string) => {
+  const load = useCallback(async (userAddress: string, userPhone: string) => {
     try {
       const svcs = await api.get<Service[]>("/services");
       setServices(svcs);
       setAddress(userAddress);
+      setPhone(userPhone);
       if (preselectedId) {
         const found = svcs.find((s) => s.id === preselectedId);
         if (found) {
@@ -230,7 +234,7 @@ function ReservasiForm() {
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
-    load(user.address || "");
+    load(user.address || "", user.phone_number || "");
   }, [user, router, load]);
 
   const finalPrice = selectedVariant
@@ -250,6 +254,9 @@ function ReservasiForm() {
     setError("");
     setLoading(true);
     try {
+      if (phone && phone !== (user?.phone_number || "")) {
+        await api.patch("/users/me", { phone_number: phone });
+      }
       const result = await api.post<Booking>("/bookings", {
         services_id: selectedService.id,
         variant_id: selectedVariant?.id,
@@ -274,6 +281,7 @@ function ReservasiForm() {
     setSelectedVariant(null);
     setSchedule("");
     setAddress("");
+    setPhone("");
     setProvince("");
     setCity("");
     setPaymentMethod("");
@@ -314,7 +322,6 @@ function ReservasiForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-7">
-        {/* Pilih Layanan */}
         <div>
           <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Pilih Layanan</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
@@ -353,7 +360,6 @@ function ReservasiForm() {
           </div>
         </div>
 
-        {/* Pilih Varian */}
         {selectedService && hasVariants && (
           <div>
             <label className="block text-[13px] font-medium text-[#3D342D] mb-2">
@@ -379,7 +385,6 @@ function ReservasiForm() {
           </div>
         )}
 
-        {/* Jadwal */}
         <div>
           <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Tanggal & Jam Kunjungan</label>
           <input
@@ -392,7 +397,7 @@ function ReservasiForm() {
           />
         </div>
 
-        {/* Provinsi & Kota */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Provinsi</label>
@@ -425,7 +430,6 @@ function ReservasiForm() {
           </div>
         </div>
 
-        {/* Alamat */}
         <div>
           <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Alamat Lengkap</label>
           <textarea
@@ -447,7 +451,29 @@ function ReservasiForm() {
           )}
         </div>
 
-        {/* Metode Pembayaran */}
+        <div>
+          <label className="block text-[13px] font-medium text-[#3D342D] mb-2">
+            Nomor Telepon{" "}
+            <span className="text-[#7A6E64] font-normal">(untuk konfirmasi & pembayaran)</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Contoh: 081234567890"
+            className="w-full px-4 py-3 border border-[#DDD7CF] rounded-xl text-[14px] text-[#1A1410] placeholder:text-[#C2B9AF] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white transition-all duration-200"
+          />
+          {user?.phone_number && phone !== user.phone_number && phone && (
+            <button
+              type="button"
+              onClick={() => setPhone(user.phone_number || "")}
+              className="mt-1.5 text-[12px] text-[#B07D3E] hover:underline"
+            >
+              ↩ Gunakan nomor dari profil
+            </button>
+          )}
+        </div>
+
         <div>
           <label className="block text-[13px] font-medium text-[#3D342D] mb-3">Metode Pembayaran</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -480,9 +506,9 @@ function ReservasiForm() {
 
           {paymentMethod && selectedService && !needsVariant && (
             <div className="mt-4">
-              {paymentMethod.startsWith("VA ") ? (
-                <VirtualAccountDetail bank={paymentMethod.replace("VA ", "")} amount={finalPrice} />
-              ) : paymentMethod === "QRIS" ? (
+              {paymentMethod.startsWith("VA_") ? (
+                <VirtualAccountDetail bank={paymentMethod.replace("VA_", "")} amount={finalPrice} />
+              ) : paymentMethod === "QRIS" || paymentMethod === "GOPAY" ? (
                 <QRISDetail amount={finalPrice} />
               ) : (
                 <CashDetail amount={finalPrice} />
@@ -491,7 +517,6 @@ function ReservasiForm() {
           )}
         </div>
 
-        {/* Summary */}
         {selectedService && (
           <div className="bg-[#F8F6F3] rounded-2xl p-5 border border-[#EDE9E4]">
             <p className="text-[12px] font-semibold uppercase tracking-widest text-[#7A6E64] mb-4">Ringkasan Reservasi</p>

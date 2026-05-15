@@ -53,7 +53,6 @@ function ReviewModal({ booking, onClose, onSubmit, loading }: ReviewModalProps) 
           {booking.services?.services_name} · Teknisi: {booking.provider?.full_name}
         </p>
 
-        {/* Star rating */}
         <div className="flex gap-1.5 mb-4">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -154,7 +153,6 @@ function downloadInvoice(booking: Booking) {
   URL.revokeObjectURL(url);
 }
 
-// ── Main Dashboard ────────────────────────────────────────────
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -162,6 +160,7 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [paying, setPaying] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [reviewTarget, setReviewTarget] = useState<Booking | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -197,6 +196,11 @@ export default function DashboardPage() {
     } finally {
       setCancelling(null);
     }
+  }
+
+  function handlePay(bookingId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    router.push(`/bookings/${bookingId}`);
   }
 
   async function handleReviewSubmit(rating: number, comment: string) {
@@ -244,7 +248,6 @@ export default function DashboardPage() {
       <div className="min-h-screen pt-[88px] pb-24 px-8 bg-[#FDFCFB]">
         <div className="max-w-5xl mx-auto">
 
-          {/* Header */}
           <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-5">
             <div>
               <Badge variant="accent" className="mb-3">Dashboard Pelanggan</Badge>
@@ -257,8 +260,6 @@ export default function DashboardPage() {
               <Button>+ Reservasi Baru</Button>
             </Link>
           </div>
-
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-10">
             {[
               { label: "Total Reservasi", value: stats.total },
@@ -278,7 +279,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Booking list */}
           <div>
             <h2 className="text-[18px] font-medium text-[#1A1410] mb-5">Riwayat Reservasi</h2>
 
@@ -295,15 +295,17 @@ export default function DashboardPage() {
                   const canReview = booking.status === "COMPLETED" && !booking.review;
                   const hasReviewed = booking.status === "COMPLETED" && !!booking.review;
                   return (
-                    <div key={booking.id} className="bg-white rounded-2xl border border-stone-100 p-6 hover:shadow-[0_4px_20px_rgb(26,20,16,0.06)] transition-all duration-300">
+                    <div
+                      key={booking.id}
+                      onClick={() => router.push(`/bookings/${booking.id}`)}
+                      className="bg-white rounded-2xl border border-stone-100 p-6 hover:shadow-[0_4px_20px_rgb(26,20,16,0.06)] transition-all duration-300 cursor-pointer"
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <Link href={`/bookings/${booking.id}`}>
-                              <h3 className="text-[16px] font-medium text-[#1A1410] hover:text-[#B07D3E] transition-colors cursor-pointer">
-                                {booking.services?.services_name || "Layanan"}
-                              </h3>
-                            </Link>
+                            <h3 className="text-[16px] font-medium text-[#1A1410] hover:text-[#B07D3E] transition-colors">
+                              {booking.services?.services_name || "Layanan"}
+                            </h3>
                             <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${STATUS_COLOR[booking.status]}`}>
                               {STATUS_LABEL[booking.status]}
                             </span>
@@ -337,14 +339,14 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex flex-col items-end gap-2">
-                          <p className="text-[17px] font-semibold text-[#1A1410]">
+                          <p className="text-[17px] font-semibold text-stone-900">
                             {formatPrice(booking.total_price)}
                           </p>
 
                           {booking.status === "COMPLETED" && (
                             <button
-                              onClick={() => downloadInvoice(booking)}
-                              className="text-[12px] text-[#B07D3E] hover:underline font-medium"
+                              onClick={(e) => { e.stopPropagation(); downloadInvoice(booking); }}
+                              className="text-[12px] text-accent-500 hover:underline font-medium"
                             >
                               ⬇ Unduh Invoice
                             </button>
@@ -352,16 +354,28 @@ export default function DashboardPage() {
 
                           {canReview && (
                             <button
-                              onClick={() => setReviewTarget(booking)}
+                              onClick={(e) => { e.stopPropagation(); setReviewTarget(booking); }}
                               className="text-[12px] font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full transition-colors"
                             >
                               ★ Beri Ulasan
                             </button>
                           )}
 
+                          {booking.status === "CONFIRMED" &&
+                            booking.payment &&
+                            booking.payment.status !== "SUCCESS" && (
+                            <button
+                              onClick={(e) => handlePay(booking.id, e)}
+                              disabled={paying === booking.id}
+                              className="text-[12px] font-semibold text-white bg-accent-500 hover:bg-[#9a6c33] px-3 py-1.5 rounded-full transition-colors disabled:opacity-50"
+                            >
+                              💳 Bayar Sekarang
+                            </button>
+                          )}
+
                           {(booking.status === "PENDING" || booking.status === "CONFIRMED") && (
                             <button
-                              onClick={() => handleCancel(booking.id)}
+                              onClick={(e) => { e.stopPropagation(); handleCancel(booking.id); }}
                               disabled={cancelling === booking.id}
                               className="text-[12px] text-red-500 hover:text-red-700 font-medium transition-colors disabled:opacity-50"
                             >

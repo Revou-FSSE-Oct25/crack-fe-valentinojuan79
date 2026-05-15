@@ -9,6 +9,14 @@ export type BookingStatus =
 
 export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
 
+export type GatewayMethod =
+  | "VA_BCA"
+  | "VA_BNI"
+  | "VA_BRI"
+  | "VA_MANDIRI"
+  | "QRIS"
+  | "GOPAY";
+
 export interface User {
   id: string;
   full_name: string;
@@ -48,6 +56,13 @@ export interface Payment {
   status: PaymentStatus;
   amount_to_pay: number;
   booking_id: string;
+  // Field gateway Midtrans
+  snap_token?: string;
+  payment_url?: string;
+  va_number?: string;
+  qr_url?: string;
+  paid_at?: string;
+  expired_at?: string;
 }
 
 export interface Review {
@@ -87,4 +102,14 @@ export interface TechnicianWithRating extends User {
     createdAt: string;
     booking: { services: { services_name: string } };
   }>;
+}
+
+// Response dari POST /payments/gateway
+export interface GatewayPaymentResponse {
+  payment_id: string;
+  method: string;
+  amount: number;
+  snap_token: string;
+  payment_url: string;
+  expired_at: string;
 }
