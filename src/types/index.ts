@@ -15,6 +15,7 @@ export interface User {
   email: string;
   phone_number?: string;
   address?: string;
+  province?: string;
   city?: string;
   role: Role;
   createdAt: string;
@@ -54,6 +55,9 @@ export interface Booking {
   status: BookingStatus;
   schedule: string;
   total_price: number;
+  address?: string;
+  province?: string;
+  city?: string;
   user_id: string;
   user?: User;
   services_id: string;

@@ -2,13 +2,44 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Checkbox } from "@/components/ui";
 import { useAuth } from "@/lib/auth-context";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+const STATS = [
+  { val: "2.400+", label: "Pelanggan Aktif" },
+  { val: "98%", label: "Kepuasan Pelanggan" },
+  { val: "150+", label: "Teknisi Terlatih" },
+  { val: "< 2 jam", label: "Rata-rata Respon" },
+];
+
+const EyeIcon = ({ crossed }: { crossed?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M1.333 8S3.333 3.333 8 3.333 14.667 8 14.667 8 12.667 12.667 8 12.667 1.333 8 1.333 8z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="8" cy="8" r="1.667" stroke="currentColor" strokeWidth="1.3"/>
+    {crossed && <path d="M2 2l12 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>}
+  </svg>
+);
+
+const EmailIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M1.333 4A1.333 1.333 0 0 1 2.667 2.667h10.666A1.333 1.333 0 0 1 14.667 4v8a1.333 1.333 0 0 1-1.334 1.333H2.667A1.333 1.333 0 0 1 1.333 12V4z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M1.333 4l6.667 4.667L14.667 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <rect x="2.667" y="7.333" width="10.666" height="7.334" rx="1.333" stroke="currentColor" strokeWidth="1.3"/>
+    <path d="M5.333 7.333V5.333a2.667 2.667 0 0 1 5.334 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+  </svg>
+);
+
+function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,17 +52,25 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(form.email, form.password);
+      const redirect = searchParams.get("redirect");
       const stored = localStorage.getItem("user");
       if (stored) {
         const u = JSON.parse(stored);
-        if (u.role === "ADMIN") router.push("/admin");
-        else if (u.role === "TECHNICIAN") router.push("/technician");
-        else router.push("/dashboard");
+        if (redirect) {
+          router.push(redirect);
+        } else if (u.role === "ADMIN") {
+          router.push("/admin");
+        } else if (u.role === "TECHNICIAN") {
+          router.push("/technician");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message || "Email atau password salah");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Email atau password salah";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -39,9 +78,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-[50%] bg-[#1A1410] flex-col justify-between p-14 relative overflow-hidden">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1A1410] flex-col justify-between p-14 relative overflow-hidden">
         <div className="absolute top-[-80px] right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[-60px] w-[320px] h-[320px] rounded-full bg-[#B07D3E] opacity-[0.05] blur-[70px] pointer-events-none" />
+
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 w-fit">
+          <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-white" />
+          </span>
+          <span className="text-[18px] font-semibold tracking-[-0.02em] text-white">Solvio</span>
+        </Link>
+
         <div className="space-y-10">
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-[#B07D3E] font-semibold mb-5">Selamat Datang Kembali</p>
@@ -54,12 +103,7 @@ export default function LoginPage() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-5">
-            {[
-              { val: "2.400+", label: "Pelanggan Aktif" },
-              { val: "98%", label: "Kepuasan Pelanggan" },
-              { val: "150+", label: "Teknisi Terlatih" },
-              { val: "< 2 jam", label: "Rata-rata Respon" },
-            ].map((s) => (
+            {STATS.map((s) => (
               <div key={s.label} className="bg-white/[0.04] border border-white/[0.07] rounded-2xl px-5 py-4">
                 <p className="text-[22px] font-normal text-white">{s.val}</p>
                 <p className="text-[11px] text-white/35 mt-1 tracking-wide">{s.label}</p>
@@ -67,6 +111,7 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
+
         <div className="border-t border-white/10 pt-8">
           <p className="text-[14px] text-white/35 font-light italic leading-relaxed">
             &ldquo;AC saya sudah bersih kembali, teknisinya datang tepat waktu dan ramah.&rdquo;
@@ -75,7 +120,9 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* Right panel */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 py-16 bg-[#FDFCFB]">
+        {/* Mobile logo */}
         <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
             <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center">
@@ -85,7 +132,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="w-full max-w-[420px] mx-auto lg:mx-0">
+        <div className="w-full max-w-[420px] mx-auto">
           <div className="mb-9">
             <h1 className="text-[clamp(1.8rem,3vw,2.2rem)] font-normal text-[#1A1410] leading-tight mb-2">
               Masuk ke Akun
@@ -112,12 +159,7 @@ export default function LoginPage() {
               fullWidth
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              leftIcon={
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M1.333 4A1.333 1.333 0 0 1 2.667 2.667h10.666A1.333 1.333 0 0 1 14.667 4v8a1.333 1.333 0 0 1-1.334 1.333H2.667A1.333 1.333 0 0 1 1.333 12V4z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M1.333 4l6.667 4.667L14.667 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              }
+              leftIcon={<EmailIcon />}
               required
             />
 
@@ -128,26 +170,8 @@ export default function LoginPage() {
               fullWidth
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              leftIcon={
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2.667" y="7.333" width="10.666" height="7.334" rx="1.333" stroke="currentColor" strokeWidth="1.3"/>
-                  <path d="M5.333 7.333V5.333a2.667 2.667 0 0 1 5.334 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-              }
-              rightIcon={
-                showPassword ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M1.333 8S3.333 3.333 8 3.333 14.667 8 14.667 8 12.667 12.667 8 12.667 1.333 8 1.333 8z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="8" cy="8" r="1.667" stroke="currentColor" strokeWidth="1.3"/>
-                    <path d="M2 2l12 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M1.333 8S3.333 3.333 8 3.333 14.667 8 14.667 8 12.667 12.667 8 12.667 1.333 8 1.333 8z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="8" cy="8" r="1.667" stroke="currentColor" strokeWidth="1.3"/>
-                  </svg>
-                )
-              }
+              leftIcon={<LockIcon />}
+              rightIcon={<EyeIcon crossed={showPassword} />}
               onRightIconClick={() => setShowPassword(!showPassword)}
               required
             />
@@ -176,5 +200,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#B07D3E] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

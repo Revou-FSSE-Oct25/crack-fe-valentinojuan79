@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -36,13 +36,25 @@ const STATUS_COLOR: Record<BookingStatus, string> = {
 };
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  const loadBookings = useCallback(async () => {
+    try {
+      const data = await api.get<Booking[]>("/bookings/my");
+      setBookings(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memuat data booking";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
@@ -52,18 +64,7 @@ export default function DashboardPage() {
       return;
     }
     loadBookings();
-  }, [user]);
-
-  async function loadBookings() {
-    try {
-      const data = await api.get<Booking[]>("/bookings/my");
-      setBookings(data);
-    } catch (err: any) {
-      setError(err.message || "Gagal memuat data booking");
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [user, router, loadBookings]);
 
   async function handleCancel(bookingId: string) {
     if (!confirm("Yakin ingin membatalkan reservasi ini?")) return;
@@ -71,8 +72,9 @@ export default function DashboardPage() {
     try {
       await api.patch(`/bookings/${bookingId}/cancel`, {});
       await loadBookings();
-    } catch (err: any) {
-      alert(err.message || "Gagal membatalkan reservasi");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal membatalkan reservasi";
+      alert(msg);
     } finally {
       setCancelling(null);
     }
@@ -102,13 +104,13 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-5">
           <div>
-            <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-2">Dashboard</p>
+            <Badge variant="accent" className="mb-3">Dashboard Pelanggan</Badge>
             <h1 className="text-[clamp(1.8rem,3.5vw,2.4rem)] font-normal text-[#1A1410] leading-tight">
               Halo, {user?.full_name.split(" ")[0]} 👋
             </h1>
             <p className="text-[15px] text-[#7A6E64] font-light mt-1">{user?.email}</p>
           </div>
-          <Link href="/bookings">
+          <Link href="/services">
             <Button>+ Reservasi Baru</Button>
           </Link>
         </div>
@@ -155,7 +157,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <Link href={`/bookings/${booking.id}`}>
                           <h3 className="text-[16px] font-medium text-[#1A1410] hover:text-[#B07D3E] transition-colors cursor-pointer">
-                            {booking.services?.services_name || "Service"}
+                            {booking.services?.services_name || "Layanan"}
                           </h3>
                         </Link>
                         <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${STATUS_COLOR[booking.status]}`}>

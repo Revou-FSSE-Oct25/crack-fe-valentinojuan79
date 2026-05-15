@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input, Checkbox } from "@/components/ui";
 import { useAuth } from "@/lib/auth-context";
 
 type Role = "CUSTOMER" | "TECHNICIAN";
-const STEPS = ["Account Type", "Personal Info", "Security"];
+const STEPS = ["Tipe Akun", "Data Diri", "Keamanan"];
 
 const EyeIcon = ({ crossed }: { crossed?: boolean }) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -23,6 +23,45 @@ const LockIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="no
 const CardIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.333" y="3.333" width="13.334" height="9.334" rx="1.333" stroke="currentColor" strokeWidth="1.3"/><path d="M1.333 6.667h13.334" stroke="currentColor" strokeWidth="1.3"/><path d="M4 10h2.667" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>);
 const StarIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.545 3.13L13 5.635l-2.5 2.435.59 3.43L8 9.77l-3.09 1.73.59-3.43L3 5.635l3.455-.505L8 2z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg>);
 
+const MapPinIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A4.667 4.667 0 0 1 12.667 6c0 3.5-4.667 8.667-4.667 8.667S3.333 9.5 3.333 6A4.667 4.667 0 0 1 8 1.333z" stroke="currentColor" strokeWidth="1.3"/><circle cx="8" cy="6" r="1.667" stroke="currentColor" strokeWidth="1.3"/></svg>);
+
+const PROVINCE_CITY: Record<string, string[]> = {
+  "Aceh": ["Banda Aceh", "Langsa", "Lhokseumawe", "Sabang", "Subulussalam"],
+  "Sumatera Utara": ["Medan", "Binjai", "Gunungsitoli", "Padangsidimpuan", "Pematangsiantar", "Sibolga", "Tanjungbalai", "Tebing Tinggi"],
+  "Sumatera Barat": ["Padang", "Bukittinggi", "Padang Panjang", "Pariaman", "Payakumbuh", "Sawahlunto", "Solok"],
+  "Riau": ["Pekanbaru", "Dumai"],
+  "Kepulauan Riau": ["Tanjungpinang", "Batam"],
+  "Jambi": ["Jambi", "Sungai Penuh"],
+  "Sumatera Selatan": ["Palembang", "Lubuklinggau", "Pagar Alam", "Prabumulih"],
+  "Kepulauan Bangka Belitung": ["Pangkalpinang"],
+  "Bengkulu": ["Bengkulu"],
+  "Lampung": ["Bandar Lampung", "Metro"],
+  "DKI Jakarta": ["Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur", "Jakarta Utara"],
+  "Banten": ["Cilegon", "Serang", "Tangerang", "Tangerang Selatan"],
+  "Jawa Barat": ["Bandung", "Bekasi", "Bogor", "Cimahi", "Cirebon", "Depok", "Sukabumi", "Tasikmalaya"],
+  "Jawa Tengah": ["Semarang", "Magelang", "Pekalongan", "Purwokerto", "Salatiga", "Solo", "Tegal"],
+  "DI Yogyakarta": ["Yogyakarta"],
+  "Jawa Timur": ["Surabaya", "Batu", "Blitar", "Kediri", "Madiun", "Malang", "Mojokerto", "Pasuruan", "Probolinggo"],
+  "Bali": ["Denpasar"],
+  "Nusa Tenggara Barat": ["Mataram", "Bima"],
+  "Nusa Tenggara Timur": ["Kupang"],
+  "Kalimantan Barat": ["Pontianak", "Singkawang"],
+  "Kalimantan Tengah": ["Palangkaraya"],
+  "Kalimantan Selatan": ["Banjarmasin", "Banjarbaru"],
+  "Kalimantan Timur": ["Samarinda", "Balikpapan", "Bontang"],
+  "Kalimantan Utara": ["Tarakan"],
+  "Sulawesi Utara": ["Manado", "Bitung", "Kotamobagu", "Tomohon"],
+  "Gorontalo": ["Gorontalo"],
+  "Sulawesi Tengah": ["Palu"],
+  "Sulawesi Barat": ["Mamuju"],
+  "Sulawesi Selatan": ["Makassar", "Palopo", "Parepare"],
+  "Sulawesi Tenggara": ["Kendari", "Baubau"],
+  "Maluku": ["Ambon", "Tual"],
+  "Maluku Utara": ["Ternate", "Tidore Kepulauan"],
+  "Papua Barat": ["Manokwari", "Sorong"],
+  "Papua": ["Jayapura"],
+};
+
 export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
@@ -34,31 +73,45 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
 
   const [customerForm, setCustomerForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
-  const [techForm, setTechForm] = useState({ name: "", email: "", phone: "", specialities: "", idNumber: "", password: "", confirmPassword: "" });
+  const [techForm, setTechForm] = useState({ name: "", email: "", phone: "", province: "", city: "", specialities: "", idNumber: "", password: "", confirmPassword: "" });
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/categories`)
+      .then((r) => r.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data.data ?? [];
+        setCategories(list.map((c: { category_name: string }) => c.category_name));
+      })
+      .catch(() => {});
+  }, []);
 
   function validateStep(): string {
     if (step === 0) return "";
     if (step === 1) {
       if (role === "CUSTOMER") {
-        if (!customerForm.name.trim()) return "Full name is required";
-        if (!customerForm.email.trim()) return "Email is required";
+        if (!customerForm.name.trim()) return "Nama lengkap wajib diisi";
+        if (!customerForm.email.trim()) return "Email wajib diisi";
       } else {
-        if (!techForm.name.trim()) return "Full name is required";
-        if (!techForm.email.trim()) return "Email is required";
-        if (!techForm.phone.trim()) return "Phone number is required";
-        if (!techForm.specialities.trim()) return "Specialities is required";
-        if (!techForm.idNumber.trim()) return "ID Number (KTP) is required";
+        if (!techForm.name.trim()) return "Nama lengkap wajib diisi";
+        if (!techForm.email.trim()) return "Email wajib diisi";
+        if (!techForm.phone.trim()) return "Nomor telepon wajib diisi";
+        if (!techForm.province.trim()) return "Provinsi wajib dipilih";
+        if (!techForm.city.trim()) return "Kota wajib dipilih";
+        if (selectedSpecs.length === 0) return "Pilih minimal satu spesialisasi layanan";
+        if (!techForm.idNumber.trim()) return "Nomor KTP wajib diisi";
       }
     }
     if (step === 2) {
       const pw = role === "CUSTOMER" ? customerForm.password : techForm.password;
       const cpw = role === "CUSTOMER" ? customerForm.confirmPassword : techForm.confirmPassword;
-      if (!pw) return "Password is required";
-      if (pw.length < 6) return "Password must be at least 6 characters";
-      if (pw !== cpw) return "Passwords do not match";
-      if (!agree) return "You must agree to the terms of service";
+      if (!pw) return "Password wajib diisi";
+      if (pw.length < 6) return "Password minimal 6 karakter";
+      if (pw !== cpw) return "Password tidak cocok";
+      if (!agree) return "Anda harus menyetujui syarat dan ketentuan";
     }
     return "";
   }
@@ -74,11 +127,12 @@ export default function RegisterPage() {
       if (role === "CUSTOMER") {
         await register({ full_name: customerForm.name, email: customerForm.email, password: customerForm.password, role: "CUSTOMER" });
       } else {
-        await register({ full_name: techForm.name, email: techForm.email, password: techForm.password, role: "TECHNICIAN", phone_number: techForm.phone, specialities: techForm.specialities, id_number: techForm.idNumber });
+        await register({ full_name: techForm.name, email: techForm.email, password: techForm.password, role: "TECHNICIAN", phone_number: techForm.phone, province: techForm.province, city: techForm.city, specialities: selectedSpecs.join(", "), id_number: techForm.idNumber });
       }
       router.push("/login?registered=1");
-    } catch (err: any) {
-      setError(err.message || "Failed to create account");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal membuat akun";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -88,27 +142,32 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-[50%] bg-stone-900 flex-col justify-between p-14 relative overflow-hidden">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-stone-900 flex-col justify-between p-14 relative overflow-hidden">
         <div className="absolute -top-20 right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
+
         <Link href="/" className="flex items-center gap-2.5 w-fit">
-          <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center"><span className="w-2.5 h-2.5 rounded-full bg-white" /></span>
+          <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-white" />
+          </span>
           <span className="text-[18px] font-semibold tracking-[-0.02em] text-white">Solvio</span>
         </Link>
+
         <div className="space-y-10">
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-[#B07D3E] font-semibold mb-5">
-              {role === "TECHNICIAN" ? "Join as Technician" : "Join Solvio"}
+              {role === "TECHNICIAN" ? "Bergabung sebagai Teknisi" : "Bergabung dengan Solvio"}
             </p>
             <h2 className="text-[clamp(2rem,3.2vw,2.8rem)] font-normal text-white leading-[1.1]">
               {role === "TECHNICIAN"
-                ? <><>Start receiving<br /></><span className="italic text-[#E4CFA8]">orders today.</span></>
-                : <><>Begin your<br /></><span className="italic text-[#E4CFA8]">journey with us.</span></>}
+                ? <><>Mulai menerima<br /></><span className="italic text-[#E4CFA8]">pesanan hari ini.</span></>
+                : <><>Mulai perjalanan<br /></><span className="italic text-[#E4CFA8]">bersama kami.</span></>}
             </h2>
           </div>
           <div className="space-y-4">
             {(role === "TECHNICIAN"
-              ? ["Receive tasks matching your skills", "Flexible schedule, work independently", "Timely and transparent payments", "Supported by Solvio 24/7"]
-              : ["Book services in minutes", "Verified & experienced technicians", "Transparent pricing, no hidden fees", "Digital visit reports in your account"]
+              ? ["Terima tugas sesuai keahlian Anda", "Jadwal fleksibel, bekerja mandiri", "Pembayaran tepat waktu dan transparan", "Didukung oleh Solvio 24/7"]
+              : ["Pesan layanan dalam hitungan menit", "Teknisi terverifikasi & berpengalaman", "Harga transparan, tanpa biaya tersembunyi", "Laporan kunjungan digital di akun Anda"]
             ).map((b) => (
               <div key={b} className="flex items-start gap-3">
                 <span className="w-5 h-5 rounded-full bg-[#B07D3E]/20 border border-[#B07D3E]/30 flex items-center justify-center text-[#B07D3E] text-[11px] font-bold shrink-0 mt-0.5">✓</span>
@@ -117,32 +176,37 @@ export default function RegisterPage() {
             ))}
           </div>
         </div>
+
         <div className="border-t border-white/10 pt-8">
           <p className="text-[14px] text-white/35 font-light italic leading-relaxed">
             {role === "TECHNICIAN"
-              ? `"Signing up as a technician was quick. Now I have many regular customers."`
-              : `"Booking home services is so easy. The technicians are professional and pricing is clear."`}
+              ? `"Daftar sebagai teknisi sangat mudah. Sekarang saya punya banyak pelanggan tetap."`
+              : `"Memesan layanan rumah sangat mudah. Teknisinya profesional dan harganya jelas."`}
           </p>
           <p className="text-[12px] text-white/25 mt-3 font-medium">
-            {role === "TECHNICIAN" ? "— Budi S., Solvio AC Technician" : "— Rina K., Solvio Customer"}
+            {role === "TECHNICIAN" ? "— Budi S., Teknisi AC Solvio" : "— Rina K., Pelanggan Solvio"}
           </p>
         </div>
       </div>
 
+      {/* Right panel */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 py-16 bg-[#FDFCFB]">
         <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
-            <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center"><span className="w-2.5 h-2.5 rounded-full bg-[#B07D3E]" /></span>
+            <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#B07D3E]" />
+            </span>
             <span className="text-[18px] font-semibold tracking-[-0.02em] text-[#1A1410]">Solvio</span>
           </Link>
         </div>
 
-        <div className="w-full max-w-[440px] mx-auto lg:mx-0">
+        <div className="w-full max-w-[440px] mx-auto">
           <div className="mb-8">
-            <h1 className="text-[clamp(1.8rem,3vw,2.2rem)] font-normal text-[#1A1410] leading-tight mb-2">Create New Account</h1>
-            <p className="text-[14px] text-[#7A6E64] font-light">Already have an account?{" "}<Link href="/login" className="text-[#B07D3E] font-medium hover:underline underline-offset-4">Sign in here</Link></p>
+            <h1 className="text-[clamp(1.8rem,3vw,2.2rem)] font-normal text-[#1A1410] leading-tight mb-2">Buat Akun Baru</h1>
+            <p className="text-[14px] text-[#7A6E64] font-light">Sudah punya akun?{" "}<Link href="/login" className="text-[#B07D3E] font-medium hover:underline underline-offset-4">Masuk di sini</Link></p>
           </div>
 
+          {/* Step indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
               {STEPS.map((s, i) => (
@@ -167,15 +231,14 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleNext} className="space-y-5">
-
             {step === 0 && (
               <div className="space-y-5">
-                <p className="text-[13px] text-[#7A6E64] font-light">Choose the type of account you want to create:</p>
+                <p className="text-[13px] text-[#7A6E64] font-light">Pilih tipe akun yang ingin Anda buat:</p>
                 <div className="grid grid-cols-2 gap-4">
                   {([
-                    { id: "CUSTOMER" as Role, label: "Customer", desc: "I want to book home services",
+                    { id: "CUSTOMER" as Role, label: "Pelanggan", desc: "Saya ingin memesan layanan rumah",
                       icon: (<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="14" width="20" height="12" rx="2" stroke="currentColor" strokeWidth="1.6"/><path d="M2 14L14 4l12 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><rect x="10" y="18" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.4"/></svg>) },
-                    { id: "TECHNICIAN" as Role, label: "Technician", desc: "I want to offer my services",
+                    { id: "TECHNICIAN" as Role, label: "Teknisi", desc: "Saya ingin menawarkan jasa saya",
                       icon: (<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M18 6a4 4 0 0 1-1.172 7.656L8 22.5l-3-.5-.5-3 8.844-8.828A4 4 0 0 1 18 6z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><circle cx="18" cy="10" r="1.5" fill="currentColor"/></svg>) },
                   ] as const).map((opt) => (
                     <button key={opt.id} type="button" onClick={() => setRole(opt.id)}
@@ -193,80 +256,138 @@ export default function RegisterPage() {
 
             {step === 1 && role === "CUSTOMER" && (
               <div className="space-y-4">
-                <Input label="Full Name" type="text" placeholder="Your full name" fullWidth value={customerForm.name}
+                <Input label="Nama Lengkap" type="text" placeholder="Nama lengkap Anda" fullWidth value={customerForm.name}
                   onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })} leftIcon={<PersonIcon />} required />
-                <Input label="Email" type="email" placeholder="name@email.com" fullWidth value={customerForm.email}
+                <Input label="Email" type="email" placeholder="nama@email.com" fullWidth value={customerForm.email}
                   onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })} leftIcon={<EmailIcon />} required />
               </div>
             )}
 
             {step === 1 && role === "TECHNICIAN" && (
               <div className="space-y-4">
-                <Input label="Full Name" type="text" placeholder="Your full name" fullWidth value={techForm.name}
+                <Input label="Nama Lengkap" type="text" placeholder="Nama lengkap Anda" fullWidth value={techForm.name}
                   onChange={(e) => setTechForm({ ...techForm, name: e.target.value })} leftIcon={<PersonIcon />} required />
-                <Input label="Email" type="email" placeholder="name@email.com" fullWidth value={techForm.email}
+                <Input label="Email" type="email" placeholder="nama@email.com" fullWidth value={techForm.email}
                   onChange={(e) => setTechForm({ ...techForm, email: e.target.value })} leftIcon={<EmailIcon />} required />
-                <Input label="Phone Number" type="tel" placeholder="08xxxxxxxxxx" fullWidth value={techForm.phone}
+                <Input label="Nomor Telepon" type="tel" placeholder="08xxxxxxxxxx" fullWidth value={techForm.phone}
                   onChange={(e) => setTechForm({ ...techForm, phone: e.target.value })} leftIcon={<PhoneIcon />} required />
-                <Input label="Specialities" type="text" placeholder="e.g. AC Repair, Electrical, Plumbing" fullWidth value={techForm.specialities}
-                  onChange={(e) => setTechForm({ ...techForm, specialities: e.target.value })} leftIcon={<StarIcon />}
-                  hint="Separate multiple skills with a comma" required />
-                <Input label="ID Number (No. KTP)" type="text" placeholder="16-digit national ID number" fullWidth value={techForm.idNumber}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[13px] font-medium text-[#3D342D] mb-1.5">Provinsi</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C2B9AF]"><MapPinIcon /></span>
+                      <select
+                        value={techForm.province}
+                        onChange={(e) => setTechForm({ ...techForm, province: e.target.value, city: "" })}
+                        required
+                        className="w-full pl-9 pr-3 py-2.5 border border-[#DDD7CF] rounded-xl text-[13px] text-[#1A1410] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white appearance-none"
+                      >
+                        <option value="">Pilih provinsi…</option>
+                        {Object.keys(PROVINCE_CITY).map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-medium text-[#3D342D] mb-1.5">Kota</label>
+                    <select
+                      value={techForm.city}
+                      onChange={(e) => setTechForm({ ...techForm, city: e.target.value })}
+                      required
+                      disabled={!techForm.province}
+                      className="w-full px-3 py-2.5 border border-[#DDD7CF] rounded-xl text-[13px] text-[#1A1410] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white disabled:opacity-40 disabled:cursor-not-allowed appearance-none"
+                    >
+                      <option value="">Pilih kota…</option>
+                      {techForm.province && PROVINCE_CITY[techForm.province]?.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-medium text-[#3D342D] mb-1.5">Spesialisasi Layanan</label>
+                  <p className="text-[11px] text-[#7A6E64] mb-2">Pilih kategori layanan yang kamu kuasai</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => {
+                      const isSelected = selectedSpecs.includes(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setSelectedSpecs((prev) =>
+                            prev.includes(cat) ? prev.filter((s) => s !== cat) : [...prev, cat]
+                          )}
+                          className={`text-[12px] font-medium px-3 py-1.5 rounded-full border transition-all duration-200 ${
+                            isSelected
+                              ? "bg-[#1A1410] text-white border-[#1A1410]"
+                              : "bg-white text-[#7A6E64] border-[#DDD7CF] hover:border-[#B07D3E] hover:text-[#B07D3E]"
+                          }`}
+                        >
+                          {isSelected && "✓ "}{cat}
+                        </button>
+                      );
+                    })}
+                    {categories.length === 0 && (
+                      <p className="text-[12px] text-[#C2B9AF] italic">Memuat kategori...</p>
+                    )}
+                  </div>
+                  {selectedSpecs.length > 0 && (
+                    <p className="text-[11px] text-[#7A6E64] mt-2">Dipilih: <span className="text-[#B07D3E] font-medium">{selectedSpecs.join(", ")}</span></p>
+                  )}
+                </div>
+                <Input label="Nomor KTP" type="text" placeholder="16 digit nomor KTP" fullWidth value={techForm.idNumber}
                   onChange={(e) => setTechForm({ ...techForm, idNumber: e.target.value })} leftIcon={<CardIcon />}
-                  hint="ID photo can be uploaded after registration" required />
+                  hint="Foto KTP dapat diunggah setelah pendaftaran" required />
               </div>
             )}
 
-            {step === 2 && (
-              <div className="space-y-4">
-                {(() => {
-                  const pw = role === "CUSTOMER" ? customerForm.password : techForm.password;
-                  const cpw = role === "CUSTOMER" ? customerForm.confirmPassword : techForm.confirmPassword;
-                  const setPw = (v: string) => role === "CUSTOMER" ? setCustomerForm({ ...customerForm, password: v }) : setTechForm({ ...techForm, password: v });
-                  const setCpw = (v: string) => role === "CUSTOMER" ? setCustomerForm({ ...customerForm, confirmPassword: v }) : setTechForm({ ...techForm, confirmPassword: v });
-                  return (
-                    <>
-                      <Input label="Password" type={showPassword ? "text" : "password"} placeholder="Min. 6 characters" fullWidth
-                        value={pw} onChange={(e) => setPw(e.target.value)} leftIcon={<LockIcon />}
-                        rightIcon={<EyeIcon crossed={showPassword} />} onRightIconClick={() => setShowPassword(!showPassword)} required />
-                      {pw.length > 0 && (
-                        <div className="flex gap-1.5">
-                          {[pw.length >= 6, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].map((met, i) => (
-                            <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${met ? "bg-[#B07D3E]" : "bg-[#EDE9E4]"}`} />
-                          ))}
-                        </div>
-                      )}
-                      <Input label="Confirm Password" type={showConfirm ? "text" : "password"} placeholder="Repeat your password" fullWidth
-                        value={cpw} onChange={(e) => setCpw(e.target.value)} leftIcon={<LockIcon />}
-                        rightIcon={<EyeIcon crossed={showConfirm} />} onRightIconClick={() => setShowConfirm(!showConfirm)}
-                        error={cpw.length > 0 && pw !== cpw ? "Passwords do not match" : undefined} required />
-                    </>
-                  );
-                })()}
-                <div className="pt-1">
-                  <Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)}
-                    label={<span>I agree to the{" "}<Link href="/terms" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Terms of Service</Link>{" "}and{" "}<Link href="/privacy" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Privacy Policy</Link></span>}
-                    required />
+            {step === 2 && (() => {
+              const pw = role === "CUSTOMER" ? customerForm.password : techForm.password;
+              const cpw = role === "CUSTOMER" ? customerForm.confirmPassword : techForm.confirmPassword;
+              const setPw = (v: string) => role === "CUSTOMER" ? setCustomerForm({ ...customerForm, password: v }) : setTechForm({ ...techForm, password: v });
+              const setCpw = (v: string) => role === "CUSTOMER" ? setCustomerForm({ ...customerForm, confirmPassword: v }) : setTechForm({ ...techForm, confirmPassword: v });
+              return (
+                <div className="space-y-4">
+                  <Input label="Password" type={showPassword ? "text" : "password"} placeholder="Min. 6 karakter" fullWidth
+                    value={pw} onChange={(e) => setPw(e.target.value)} leftIcon={<LockIcon />}
+                    rightIcon={<EyeIcon crossed={showPassword} />} onRightIconClick={() => setShowPassword(!showPassword)} required />
+                  {pw.length > 0 && (
+                    <div className="flex gap-1.5">
+                      {[pw.length >= 6, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].map((met, i) => (
+                        <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${met ? "bg-[#B07D3E]" : "bg-[#EDE9E4]"}`} />
+                      ))}
+                    </div>
+                  )}
+                  <Input label="Konfirmasi Password" type={showConfirm ? "text" : "password"} placeholder="Ulangi password Anda" fullWidth
+                    value={cpw} onChange={(e) => setCpw(e.target.value)} leftIcon={<LockIcon />}
+                    rightIcon={<EyeIcon crossed={showConfirm} />} onRightIconClick={() => setShowConfirm(!showConfirm)}
+                    error={cpw.length > 0 && pw !== cpw ? "Password tidak cocok" : undefined} required />
+                  <div className="pt-1">
+                    <Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)}
+                      label={<span>Saya menyetujui{" "}<Link href="/ketentuan" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Syarat Layanan</Link>{" "}dan{" "}<Link href="/privasi" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Kebijakan Privasi</Link></span>}
+                      required />
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <div className={`flex gap-3 pt-2 ${step > 0 ? "flex-row" : ""}`}>
               {step > 0 && (
                 <button type="button" onClick={() => { setStep(step - 1); setError(""); }}
                   className="px-6 py-3.5 border border-[#DDD7CF] text-[#3D342D] text-[14px] font-medium rounded-full hover:border-[#1A1410] transition-all duration-200">
-                  ← Back
+                  ← Kembali
                 </button>
               )}
               <Button type="submit" fullWidth size="lg" isLoading={isLoading} disabled={step === 2 && !agree}>
-                {isLoading ? "Creating account…" : step < STEPS.length - 1 ? "Continue →" : "Create Account"}
+                {isLoading ? "Membuat akun…" : step < STEPS.length - 1 ? "Lanjut →" : "Buat Akun"}
               </Button>
             </div>
           </form>
 
           <p className="mt-6 text-[12px] text-[#C2B9AF] text-center leading-relaxed">
-            Already have an account?{" "}
-            <Link href="/login" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Sign in now</Link>
+            Sudah punya akun?{" "}
+            <Link href="/login" className="text-[#B07D3E] font-medium hover:underline underline-offset-2">Masuk sekarang</Link>
           </p>
         </div>
       </div>

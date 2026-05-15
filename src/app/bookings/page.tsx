@@ -1,24 +1,23 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { Service, ServiceVariant, Booking } from "@/types";
-import { Button } from "@/components/ui";
+import { Button, Badge } from "@/components/ui";
 import Link from "next/link";
 
 function formatPrice(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
-
 function VirtualAccountDetail({ bank, amount }: { bank: string; amount: number }) {
   const vaNumbers: Record<string, string> = {
-    "BCA": "8008 0012 3456 789",
-    "Mandiri": "8888 0098 7654 321",
-    "BNI": "9888 0011 2233 445",
-    "BRI": "0088 0123 4567 890",
+    BCA: "8008 0012 3456 789",
+    Mandiri: "8888 0098 7654 321",
+    BNI: "9888 0011 2233 445",
+    BRI: "0088 0123 4567 890",
   };
   const va = vaNumbers[bank] || "8000 XXXX XXXX XXX";
 
@@ -65,7 +64,6 @@ function QRISDetail({ amount }: { amount: number }) {
           Bayar setelah dikonfirmasi
         </span>
       </div>
-      {/* QR placeholder */}
       <div className="flex flex-col items-center py-4">
         <div className="w-44 h-44 bg-white border-2 border-[#EDE9E4] rounded-2xl flex items-center justify-center text-6xl">
           📱
@@ -107,7 +105,6 @@ function CashDetail({ amount }: { amount: number }) {
   );
 }
 
-
 function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => void }) {
   const payMethod = booking.payment?.method || "";
   const amount = booking.total_price;
@@ -121,7 +118,6 @@ function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => 
         Admin akan mengkonfirmasi dalam 1×24 jam.
       </p>
 
-      {/* Payment instruction */}
       <div className="text-left mb-8">
         <p className="text-[12px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">Instruksi Pembayaran</p>
         {payMethod.startsWith("VA ") ? (
@@ -145,7 +141,6 @@ function SuccessScreen({ booking, onReset }: { booking: Booking; onReset: () => 
   );
 }
 
-
 const PAYMENT_METHODS = [
   { id: "VA BCA", label: "VA BCA", icon: "🏦", desc: "Virtual Account BCA" },
   { id: "VA Mandiri", label: "VA Mandiri", icon: "🏦", desc: "Virtual Account Mandiri" },
@@ -153,6 +148,43 @@ const PAYMENT_METHODS = [
   { id: "QRIS", label: "QRIS", icon: "📱", desc: "Semua dompet digital" },
   { id: "Tunai", label: "Tunai", icon: "💵", desc: "Bayar ke teknisi" },
 ];
+
+const PROVINCE_CITY: Record<string, string[]> = {
+  "Aceh": ["Banda Aceh", "Langsa", "Lhokseumawe", "Sabang", "Subulussalam"],
+  "Sumatera Utara": ["Medan", "Binjai", "Gunungsitoli", "Padangsidimpuan", "Pematangsiantar", "Sibolga", "Tanjungbalai", "Tebing Tinggi"],
+  "Sumatera Barat": ["Padang", "Bukittinggi", "Padang Panjang", "Pariaman", "Payakumbuh", "Sawahlunto", "Solok"],
+  "Riau": ["Pekanbaru", "Dumai"],
+  "Kepulauan Riau": ["Tanjungpinang", "Batam"],
+  "Jambi": ["Jambi", "Sungai Penuh"],
+  "Sumatera Selatan": ["Palembang", "Lubuklinggau", "Pagar Alam", "Prabumulih"],
+  "Kepulauan Bangka Belitung": ["Pangkalpinang"],
+  "Bengkulu": ["Bengkulu"],
+  "Lampung": ["Bandar Lampung", "Metro"],
+  "DKI Jakarta": ["Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur", "Jakarta Utara"],
+  "Banten": ["Cilegon", "Serang", "Tangerang", "Tangerang Selatan"],
+  "Jawa Barat": ["Bandung", "Bekasi", "Bogor", "Cimahi", "Cirebon", "Depok", "Sukabumi", "Tasikmalaya"],
+  "Jawa Tengah": ["Semarang", "Magelang", "Pekalongan", "Purwokerto", "Salatiga", "Solo", "Tegal"],
+  "DI Yogyakarta": ["Yogyakarta"],
+  "Jawa Timur": ["Surabaya", "Batu", "Blitar", "Kediri", "Madiun", "Malang", "Mojokerto", "Pasuruan", "Probolinggo"],
+  "Bali": ["Denpasar"],
+  "Nusa Tenggara Barat": ["Mataram", "Bima"],
+  "Nusa Tenggara Timur": ["Kupang"],
+  "Kalimantan Barat": ["Pontianak", "Singkawang"],
+  "Kalimantan Tengah": ["Palangkaraya"],
+  "Kalimantan Selatan": ["Banjarmasin", "Banjarbaru"],
+  "Kalimantan Timur": ["Samarinda", "Balikpapan", "Bontang"],
+  "Kalimantan Utara": ["Tarakan"],
+  "Sulawesi Utara": ["Manado", "Bitung", "Kotamobagu", "Tomohon"],
+  "Gorontalo": ["Gorontalo"],
+  "Sulawesi Tengah": ["Palu"],
+  "Sulawesi Barat": ["Mamuju"],
+  "Sulawesi Selatan": ["Makassar", "Palopo", "Parepare"],
+  "Sulawesi Tenggara": ["Kendari", "Baubau"],
+  "Maluku": ["Ambon", "Tual"],
+  "Maluku Utara": ["Ternate", "Tidore Kepulauan"],
+  "Papua Barat": ["Manokwari", "Sorong"],
+  "Papua": ["Jayapura"],
+};
 
 function ReservasiForm() {
   const { user } = useAuth();
@@ -165,39 +197,41 @@ function ReservasiForm() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ServiceVariant | null>(null);
   const [schedule, setSchedule] = useState("");
-  const [address, setAddress] = useState(user?.address || "");
+  const [address, setAddress] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   const [successBooking, setSuccessBooking] = useState<Booking | null>(null);
 
-  useEffect(() => {
-    if (!user) { router.push("/login"); return; }
-    setAddress(user.address || "");
-
-    async function load() {
-      try {
-        const svcs = await api.get<Service[]>("/services");
-        setServices(svcs);
-        if (preselectedId) {
-          const found = svcs.find((s) => s.id === preselectedId);
-          if (found) {
-            setSelectedService(found);
-            if (preselectedVariantId && found.variants) {
-              const v = found.variants.find((v) => v.id === preselectedVariantId);
-              if (v) setSelectedVariant(v);
-            }
+  const load = useCallback(async (userAddress: string) => {
+    try {
+      const svcs = await api.get<Service[]>("/services");
+      setServices(svcs);
+      setAddress(userAddress);
+      if (preselectedId) {
+        const found = svcs.find((s) => s.id === preselectedId);
+        if (found) {
+          setSelectedService(found);
+          if (preselectedVariantId && found.variants) {
+            const v = found.variants.find((vr) => vr.id === preselectedVariantId);
+            if (v) setSelectedVariant(v);
           }
         }
-      } catch {
-        setError("Gagal memuat daftar layanan");
-      } finally {
-        setFetchLoading(false);
       }
+    } catch {
+      setError("Gagal memuat daftar layanan");
+    } finally {
+      setFetchLoading(false);
     }
-    load();
-  }, [user, preselectedId, preselectedVariantId]);
+  }, [preselectedId, preselectedVariantId]);
+
+  useEffect(() => {
+    if (!user) { router.push("/login"); return; }
+    load(user.address || "");
+  }, [user, router, load]);
 
   const finalPrice = selectedVariant
     ? selectedVariant.price
@@ -210,6 +244,8 @@ function ReservasiForm() {
     e.preventDefault();
     if (!selectedService) { setError("Pilih layanan terlebih dahulu"); return; }
     if (needsVariant) { setError("Pilih varian/tipe layanan terlebih dahulu"); return; }
+    if (!province) { setError("Pilih provinsi terlebih dahulu"); return; }
+    if (!city) { setError("Pilih kota terlebih dahulu"); return; }
     if (!paymentMethod) { setError("Pilih metode pembayaran terlebih dahulu"); return; }
     setError("");
     setLoading(true);
@@ -219,11 +255,14 @@ function ReservasiForm() {
         variant_id: selectedVariant?.id,
         schedule: new Date(schedule).toISOString(),
         address,
+        province,
+        city,
         payment_method: paymentMethod,
       });
       setSuccessBooking(result);
-    } catch (err: any) {
-      setError(err.message || "Gagal membuat reservasi");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal membuat reservasi";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -234,6 +273,9 @@ function ReservasiForm() {
     setSelectedService(null);
     setSelectedVariant(null);
     setSchedule("");
+    setAddress("");
+    setProvince("");
+    setCity("");
     setPaymentMethod("");
   }
 
@@ -256,7 +298,7 @@ function ReservasiForm() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-10">
-        <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-3">Buat Reservasi</p>
+        <Badge variant="accent" className="mb-3">Reservasi Baru</Badge>
         <h1 className="text-[clamp(1.8rem,3.5vw,2.5rem)] font-normal text-[#1A1410] leading-tight">
           Jadwalkan Servis Rumah
         </h1>
@@ -311,7 +353,7 @@ function ReservasiForm() {
           </div>
         </div>
 
-        {/* Pilih Varian (kalau ada) */}
+        {/* Pilih Varian */}
         {selectedService && hasVariants && (
           <div>
             <label className="block text-[13px] font-medium text-[#3D342D] mb-2">
@@ -350,6 +392,39 @@ function ReservasiForm() {
           />
         </div>
 
+        {/* Provinsi & Kota */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Provinsi</label>
+            <select
+              value={province}
+              onChange={(e) => { setProvince(e.target.value); setCity(""); }}
+              required
+              className="w-full px-4 py-3 border border-[#DDD7CF] rounded-xl text-[14px] text-[#1A1410] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white transition-all duration-200"
+            >
+              <option value="">Pilih provinsi…</option>
+              {Object.keys(PROVINCE_CITY).map((prov) => (
+                <option key={prov} value={prov}>{prov}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Kota / Kabupaten</label>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+              disabled={!province}
+              className="w-full px-4 py-3 border border-[#DDD7CF] rounded-xl text-[14px] text-[#1A1410] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <option value="">Pilih kota…</option>
+              {province && PROVINCE_CITY[province]?.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Alamat */}
         <div>
           <label className="block text-[13px] font-medium text-[#3D342D] mb-2">Alamat Lengkap</label>
@@ -361,6 +436,15 @@ function ReservasiForm() {
             required
             className="w-full px-4 py-3 border border-[#DDD7CF] rounded-xl text-[14px] text-[#1A1410] placeholder:text-[#C2B9AF] focus:outline-none focus:ring-2 focus:ring-[#B07D3E]/20 focus:border-[#B07D3E] bg-white transition-all duration-200 resize-none"
           />
+          {user?.address && address !== user.address && (
+            <button
+              type="button"
+              onClick={() => setAddress(user.address || "")}
+              className="mt-1.5 text-[12px] text-[#B07D3E] hover:underline"
+            >
+              ↩ Gunakan alamat dari profil
+            </button>
+          )}
         </div>
 
         {/* Metode Pembayaran */}
@@ -394,7 +478,6 @@ function ReservasiForm() {
             ))}
           </div>
 
-          {/* Inline payment detail preview */}
           {paymentMethod && selectedService && !needsVariant && (
             <div className="mt-4">
               {paymentMethod.startsWith("VA ") ? (
@@ -440,7 +523,13 @@ function ReservasiForm() {
           </div>
         )}
 
-        <Button type="submit" fullWidth size="lg" isLoading={loading} disabled={loading || !selectedService || !paymentMethod || needsVariant}>
+        <Button
+          type="submit"
+          fullWidth
+          size="lg"
+          isLoading={loading}
+          disabled={loading || !selectedService || !paymentMethod || !!needsVariant}
+        >
           {loading ? "Memproses…" : "Buat Reservasi"}
         </Button>
       </form>

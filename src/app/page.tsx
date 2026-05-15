@@ -69,7 +69,6 @@ export default function HomePage() {
   return (
     <div className="w-full">
 
-      {/* HERO */}
       <section className="relative min-h-screen flex flex-col justify-center px-8 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_60%_40%,#EDE9E4_0%,transparent_65%)] pointer-events-none" />
 
@@ -78,9 +77,7 @@ export default function HomePage() {
             <Badge variant="accent">Servis Rumah Terpercaya</Badge>
           </div>
 
-          {/* 2-column: text left, illustration right */}
           <div className="mt-8 grid lg:grid-cols-2 gap-12 items-center animate-fade-up delay-75">
-            {/* Left: text */}
             <div>
               <h1 className="text-[clamp(2.8rem,5.5vw,5.5rem)] font-normal leading-[1.05] text-stone-900 tracking-[-0.025em]">
                 Servis Rumah<br />

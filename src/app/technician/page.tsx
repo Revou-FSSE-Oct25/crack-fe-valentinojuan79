@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { Booking, BookingStatus } from "@/types";
+import { Badge } from "@/components/ui";
 
 function formatPrice(n: number) { return "Rp " + n.toLocaleString("id-ID"); }
 function formatDate(s: string) {
@@ -32,31 +33,34 @@ export default function TeknisiPage() {
   const [tasks, setTasks] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  const loadTasks = useCallback(async () => {
+    try {
+      const data = await api.get<Booking[]>("/bookings/tasks");
+      setTasks(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memuat tugas";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
     if (user.role !== "TECHNICIAN") { router.push("/dashboard"); return; }
     loadTasks();
-  }, [user]);
-
-  async function loadTasks() {
-    try {
-      const data = await api.get<Booking[]>("/bookings/tasks");
-      setTasks(data);
-    } catch (err: any) {
-      console.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [user, router, loadTasks]);
 
   async function updateStatus(bookingId: string, status: "ON_PROGRESS" | "COMPLETED") {
     setUpdating(bookingId);
     try {
       await api.patch(`/bookings/${bookingId}/progress`, { status });
       await loadTasks();
-    } catch (err: any) {
-      alert(err.message || "Gagal update status");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal update status";
+      alert(msg);
     } finally {
       setUpdating(null);
     }
@@ -88,7 +92,7 @@ export default function TeknisiPage() {
       <div className="max-w-4xl mx-auto">
 
         <div className="mb-10">
-          <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-2">Portal Teknisi</p>
+          <Badge variant="accent" className="mb-3">Portal Teknisi</Badge>
           <h1 className="text-[clamp(1.8rem,3.5vw,2.4rem)] font-normal text-[#1A1410] leading-tight">
             Halo, {user?.full_name.split(" ")[0]} 👷
           </h1>
@@ -109,7 +113,12 @@ export default function TeknisiPage() {
           ))}
         </div>
 
-        {/* Task list */}
+        {error && (
+          <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-[13px] text-red-600">{error}</p>
+          </div>
+        )}
+
         <h2 className="text-[18px] font-medium text-[#1A1410] mb-5">Semua Tugas</h2>
 
         {tasks.length === 0 ? (
@@ -146,6 +155,12 @@ export default function TeknisiPage() {
                         <span>📞</span>
                         <span>{task.user?.phone_number || "–"}</span>
                       </div>
+                      {task.user?.address && (
+                        <div className="flex items-center gap-2 text-[13px] text-[#7A6E64]">
+                          <span>📍</span>
+                          <span>{task.user.address}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-[13px] font-semibold text-[#1A1410]">
                         <span>💰</span>
                         <span>{formatPrice(task.total_price)}</span>
@@ -172,6 +187,11 @@ export default function TeknisiPage() {
                       >
                         {updating === task.id ? "…" : "Tandai Selesai ✓"}
                       </button>
+                    )}
+                    {task.status === "PENDING" && (
+                      <span className="text-[12px] text-amber-600 text-center py-2 bg-amber-50 border border-amber-200 rounded-xl px-3">
+                        Menunggu konfirmasi admin
+                      </span>
                     )}
                     {(task.status === "COMPLETED" || task.status === "CANCELLED") && (
                       <span className="text-[12px] text-[#C2B9AF] text-center py-2">

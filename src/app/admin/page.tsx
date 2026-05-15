@@ -48,7 +48,7 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
   const [newProvider, setNewProvider] = useState<string>(b.provider_id || "");
 
   const isFinished = ["COMPLETED", "CANCELLED"].includes(b.status);
-  const customerCity = b.user?.city;
+  const customerCity = b.city || b.user?.city;
   const bookingCategory = b.services?.category?.category_name || "";
 
   const filteredTechs = bookingCategory
@@ -61,6 +61,7 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
 
   const techsToShow = filteredTechs.length > 0 ? filteredTechs : technicians;
   const isFiltered = filteredTechs.length > 0 && filteredTechs.length < technicians.length;
+  
 
   const sortedTechs = [...techsToShow].sort((a, b) => {
     if (customerCity && a.city === customerCity && b.city !== customerCity) return -1;
@@ -104,16 +105,25 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
               <Row label="Nama" value={b.user?.full_name || "—"} />
               <Row label="Email" value={b.user?.email || "—"} />
               <Row label="Telepon" value={b.user?.phone_number || "—"} />
-              <Row label="Kota" value={
-                b.user?.city
-                  ? <span className="font-semibold text-[#B07D3E]">{b.user.city}</span>
+              <Row label="Provinsi" value={
+                b.province
+                  ? <span className="font-semibold text-[#B07D3E]">{b.province}</span>
+                  : b.user?.province
+                  ? <span className="text-[#7A6E64]">{b.user.province}</span>
                   : <span className="text-[#C2B9AF] italic">Belum diisi</span>
               } />
-              {b.user?.address ? (
+              <Row label="Kota" value={
+                b.city
+                  ? <span className="font-semibold text-[#B07D3E]">{b.city}</span>
+                  : b.user?.city
+                  ? <span className="text-[#7A6E64]">{b.user.city}</span>
+                  : <span className="text-[#C2B9AF] italic">Belum diisi</span>
+              } />
+              {(b.address || b.user?.address) ? (
                 <div>
                   <p className="text-[11px] text-[#C2B9AF] uppercase tracking-widest mb-1">Alamat Kunjungan</p>
                   <p className="text-[13px] text-[#1A1410] leading-relaxed bg-white rounded-xl px-3 py-2 border border-[#EDE9E4]">
-                    {b.user.address}
+                    {b.address || b.user?.address}
                   </p>
                 </div>
               ) : (
@@ -167,7 +177,7 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
           <section>
             <p className="text-[11px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">
               Assign Teknisi
-              {isFiltered && (
+              {filteredTechs.length > 0 && filteredTechs.length < technicians.length && (
                 <span className="ml-2 normal-case text-[#B07D3E] font-medium">— spesialis {bookingCategory}</span>
               )}
               {!isFiltered && customerCity && (
@@ -294,7 +304,7 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
             <Button variant="outline" fullWidth onClick={onClose}>Tutup</Button>
             <Button
               fullWidth
-              isLoading={updating}
+              isLoading={!!updating}
               onClick={handleSave}
               disabled={newStatus === b.status && newProvider === (b.provider_id || "")}
             >
@@ -382,8 +392,8 @@ function AdminBookings() {
       ]);
       setBookings(bkgs);
       setTechnicians(techs);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Terjadi kesalahan");
     } finally {
       setLoading(false);
     }
@@ -400,8 +410,8 @@ function AdminBookings() {
           : prev
       );
       setSelectedBooking(null);
-    } catch (err: any) {
-      alert(err.message || "Gagal update status");
+    } catch (err: unknown) {
+      alert((err instanceof Error ? err.message : undefined) || "Gagal update status");
     } finally {
       setUpdating(false);
     }
@@ -505,10 +515,10 @@ function AdminBookings() {
                   <td className="px-5 py-4">
                     <p className="text-[13px] font-medium text-[#1A1410]">{b.user?.full_name}</p>
                     <p className="text-[11px] text-[#C2B9AF]">{b.user?.email}</p>
-                    {b.user?.city && (
-                      <p className="text-[11px] text-[#B07D3E] mt-0.5">📍 {b.user.city}</p>
+                    {(b.city || b.user?.city) && (
+                      <p className="text-[11px] text-[#B07D3E] mt-0.5">📍 {b.city || b.user?.city}</p>
                     )}
-                    {!b.user?.address && (
+                    {!b.address && !b.user?.address && (
                       <p className="text-[10px] text-red-400 mt-0.5">⚠️ Alamat kosong</p>
                     )}
                   </td>
@@ -594,8 +604,8 @@ function AdminServices() {
       }
       setShowForm(false);
       await load();
-    } catch (err: any) {
-      alert(err.message || "Gagal menyimpan");
+    } catch (err: unknown) {
+      alert((err instanceof Error ? err.message : undefined) || "Gagal menyimpan");
     } finally {
       setSaving(false);
     }
@@ -606,8 +616,8 @@ function AdminServices() {
     try {
       await api.delete(`/services/${id}`);
       await load();
-    } catch (err: any) {
-      alert(err.message || "Gagal menghapus");
+    } catch (err: unknown) {
+      alert((err instanceof Error ? err.message : undefined) || "Gagal menghapus");
     }
   }
 
@@ -724,15 +734,15 @@ function AdminCategories() {
       }
       setShowForm(false); setName(""); setEditing(null);
       await load();
-    } catch (err: any) {
-      alert(err.message || "Gagal menyimpan");
+    } catch (err: unknown) {
+      alert((err instanceof Error ? err.message : undefined) || "Gagal menyimpan");
     } finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Hapus kategori ini?")) return;
     try { await api.delete(`/categories/${id}`); await load(); }
-    catch (err: any) { alert(err.message || "Gagal menghapus"); }
+    catch (err: unknown) { alert((err instanceof Error ? err.message : undefined) || "Gagal menghapus"); }
   }
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-[#B07D3E] border-t-transparent rounded-full animate-spin" /></div>;

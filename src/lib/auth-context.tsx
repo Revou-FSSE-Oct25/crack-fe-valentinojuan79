@@ -29,6 +29,7 @@ interface RegisterData {
   password: string;
   role?: "CUSTOMER" | "TECHNICIAN";
   phone_number?: string;
+  province?: string;
   city?: string;
   specialities?: string;
   id_number?: string;
@@ -36,6 +37,15 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+function setCookie(name: string, value: string, days = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -46,8 +56,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedToken = localStorage.getItem("access_token");
     const storedUser = localStorage.getItem("user");
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser) as AuthUser;
+        setToken(storedToken);
+        setUser(parsedUser);
+      } catch {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user");
+      }
     }
     setIsLoading(false);
   }, []);
@@ -61,10 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "Login gagal");
 
-    localStorage.setItem("access_token", json.access_token);
-    localStorage.setItem("user", JSON.stringify(json.user));
-    setToken(json.access_token);
-    setUser(json.user);
+    const { access_token, user: u } = json as { access_token: string; user: AuthUser };
+
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("user", JSON.stringify(u));
+    setCookie("access_token", access_token);
+    setCookie("user_role", u.role);
+
+    setToken(access_token);
+    setUser(u);
   }
 
   async function register(data: RegisterData) {
@@ -80,6 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
+    deleteCookie("access_token");
+    deleteCookie("user_role");
     setToken(null);
     setUser(null);
   }
@@ -91,8 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth harus digunakan di dalam AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 }

@@ -3,8 +3,15 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 
-const SOLID_NAV_PAGES = ["/login", "/register", "/profile", "/dashboard", "/admin", "/technician", "/bookings", "/services", "/about"];
+const SOLID_NAV_PAGES = [
+  "/login", "/register", "/profile", "/dashboard",
+  "/admin", "/technician", "/bookings", "/services", "/about",
+];
+
+// Pages where navbar+footer should be hidden (auth pages)
+const NO_SHELL_PAGES = ["/login", "/register"];
 
 export const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -12,6 +19,7 @@ export const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const isNoShell = NO_SHELL_PAGES.some((p) => pathname === p);
   const isSolidPage = SOLID_NAV_PAGES.some((p) => pathname === p || pathname.startsWith(p + "/"));
   const isSolid = scrolled || isSolidPage;
 
@@ -20,6 +28,9 @@ export const Navbar: React.FC = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Hide navbar on auth pages — they have their own layout
+  if (isNoShell) return null;
 
   function handleLogout() {
     logout();
@@ -44,17 +55,21 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-8 h-[72px] flex items-center justify-between">
         <div className="flex items-center gap-12">
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="w-7 h-7 rounded-full bg-[#1A1410] flex items-center justify-center">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#B07D3E]" />
-            </span>
+            <img src="/logo.svg" alt="Solvio Logo" width={60} height={60} className="group-hover:scale-110 transition-transform duration-200" /> 
             <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1A1410]">Solvio</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/services" className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide">
+            <Link
+              href="/services"
+              className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide"
+            >
               Layanan
             </Link>
-            <Link href="/about" className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide">
+            <Link
+              href="/about"
+              className="text-[13px] font-medium text-[#7A6E64] hover:text-[#1A1410] transition-colors duration-200 tracking-wide"
+            >
               Tentang
             </Link>
           </div>
@@ -85,7 +100,10 @@ export const Navbar: React.FC = () => {
                   <Link href="/profile" className="block px-4 py-3 text-[13px] text-[#3D342D] hover:bg-[#F8F6F3] border-t border-[#EDE9E4]">
                     Edit Profil
                   </Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-[13px] text-red-600 hover:bg-red-50 border-t border-[#EDE9E4]">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-[13px] text-red-600 hover:bg-red-50 border-t border-[#EDE9E4]"
+                  >
                     Keluar
                   </button>
                 </div>

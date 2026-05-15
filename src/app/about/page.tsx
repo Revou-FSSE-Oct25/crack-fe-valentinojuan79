@@ -1,60 +1,60 @@
 import Link from "next/link";
 import { Button, Badge } from "@/components/ui";
 
-const TEAM_VALUES = [
+const NILAI_NILAI = [
   {
     icon: "🔒",
-    title: "Verified Technicians",
-    desc: "Every technician goes through identity verification, skills assessment, and a background check before joining Solvio.",
+    title: "Teknisi Terverifikasi",
+    desc: "Setiap teknisi melewati verifikasi identitas, penilaian keahlian, dan pemeriksaan latar belakang sebelum bergabung dengan Solvio.",
   },
   {
     icon: "💰",
-    title: "Transparent Pricing",
-    desc: "No hidden fees. The price displayed is the price you pay — agreed upon before any work begins.",
+    title: "Harga Transparan",
+    desc: "Tidak ada biaya tersembunyi. Harga yang ditampilkan adalah harga yang Anda bayar — disepakati sebelum pekerjaan dimulai.",
   },
   {
     icon: "⚡",
-    title: "Fast & Reliable",
-    desc: "Our scheduling system connects you with the nearest available technician so you don't have to wait long.",
+    title: "Cepat & Andal",
+    desc: "Sistem penjadwalan kami menghubungkan Anda dengan teknisi terdekat yang tersedia sehingga Anda tidak perlu menunggu lama.",
   },
   {
     icon: "🛡️",
-    title: "Service Guarantee",
-    desc: "Not satisfied? We offer a re-service guarantee at no additional cost within 7 days of completion.",
+    title: "Garansi Layanan",
+    desc: "Tidak puas? Kami memberikan garansi servis ulang tanpa biaya tambahan dalam 7 hari setelah pekerjaan selesai.",
   },
 ];
 
-const STATS = [
-  { value: "2,400+", label: "Active Customers" },
-  { value: "98%", label: "Satisfaction Rate" },
-  { value: "150+", label: "Trained Technicians" },
-  { value: "6", label: "Cities Served" },
+const STATISTIK = [
+  { value: "2.400+", label: "Pelanggan Aktif" },
+  { value: "98%", label: "Tingkat Kepuasan" },
+  { value: "150+", label: "Teknisi Terlatih" },
+  { value: "6", label: "Kota Layanan" },
 ];
 
-const HOW_IT_WORKS = [
+const CARA_KERJA = [
   {
     step: "01",
-    title: "Choose a Service",
-    desc: "Browse our catalog of home services — from AC repair and electrical to cleaning and plumbing.",
+    title: "Pilih Layanan",
+    desc: "Jelajahi katalog layanan rumah kami — mulai dari servis AC, kelistrikan, hingga kebersihan dan perpipaan.",
   },
   {
     step: "02",
-    title: "Book a Schedule",
-    desc: "Select your preferred date and time. Enter your address and we'll handle the rest.",
+    title: "Tentukan Jadwal",
+    desc: "Pilih tanggal dan waktu yang Anda inginkan. Masukkan alamat Anda dan kami akan mengurus sisanya.",
   },
   {
     step: "03",
-    title: "Technician Visits",
-    desc: "A verified Solvio technician arrives at your location and gets the job done professionally.",
+    title: "Teknisi Datang",
+    desc: "Teknisi Solvio yang terverifikasi datang ke lokasi Anda dan menyelesaikan pekerjaan secara profesional.",
   },
   {
     step: "04",
-    title: "Pay & Review",
-    desc: "Pay after the work is done via your chosen payment method. Simple and transparent.",
+    title: "Bayar & Beri Ulasan",
+    desc: "Bayar setelah pekerjaan selesai melalui metode pembayaran pilihan Anda. Mudah dan transparan.",
   },
 ];
 
-export default function AboutPage() {
+export default function TentangPage() {
   return (
     <div className="w-full min-h-screen">
 
@@ -62,54 +62,53 @@ export default function AboutPage() {
       <section className="relative min-h-[60vh] flex flex-col justify-center px-8 overflow-hidden pt-[88px]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_60%_40%,#EDE9E4_0%,transparent_65%)] pointer-events-none" />
         <div className="max-w-7xl mx-auto w-full relative py-20">
-          <Badge variant="accent">About Solvio</Badge>
+          <Badge variant="accent">Tentang Solvio</Badge>
           <h1 className="mt-6 text-[clamp(2.8rem,5.5vw,5rem)] font-normal leading-[1.05] text-stone-900 tracking-[-0.025em] max-w-3xl">
-            Home Service,{" "}
-            <span className="italic text-[#B07D3E]">Made Simple.</span>
+            Servis Rumah,{" "}
+            <span className="italic text-[#B07D3E]">Dibuat Mudah.</span>
           </h1>
           <p className="mt-6 text-[18px] text-stone-500 font-light leading-relaxed max-w-xl">
-            Solvio was built with one mission: make professional home maintenance
-            accessible to every household — no hassle, no surprises, just
-            results you can trust.
+            Solvio dibangun dengan satu misi: membuat perawatan rumah profesional
+            dapat diakses oleh setiap keluarga — tanpa kerumitan, tanpa kejutan, hanya
+            hasil yang bisa Anda percaya.
           </p>
         </div>
       </section>
 
-      {/* Our Story */}
+      {/* Kisah Kami */}
       <section className="px-8 py-20 bg-white">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-4">
-              Our Story
+              Kisah Kami
             </p>
             <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-normal text-[#1A1410] leading-tight mb-6">
-              Born from a Real Problem
+              Lahir dari Masalah Nyata
             </h2>
             <div className="space-y-4 text-[16px] text-[#7A6E64] font-light leading-relaxed">
               <p>
-                We started Solvio after experiencing firsthand how difficult it
-                was to find a reliable, fairly-priced technician. Most
-                homeowners either overpay or settle for subpar work because
-                there&apos;s no easy way to compare, verify, or trust service
-                providers.
+                Kami mendirikan Solvio setelah merasakan sendiri betapa sulitnya menemukan
+                teknisi yang andal dengan harga yang wajar. Kebanyakan pemilik rumah
+                terpaksa membayar terlalu mahal atau menerima hasil pekerjaan yang kurang
+                memuaskan karena tidak ada cara mudah untuk membandingkan, memverifikasi,
+                dan mempercayai penyedia layanan.
               </p>
               <p>
-                So we built the platform we wished existed: a marketplace where
-                every technician is verified, every price is transparent, and
-                every booking is tracked end-to-end — from scheduling to
-                completion.
+                Maka kami membangun platform yang kami inginkan ada: sebuah marketplace di mana
+                setiap teknisi terverifikasi, setiap harga transparan, dan setiap pemesanan
+                terpantau dari awal hingga akhir — dari penjadwalan hingga penyelesaian.
               </p>
               <p>
-                Today, Solvio serves thousands of households across Indonesia,
-                empowering local technicians with steady work while giving
-                homeowners peace of mind.
+                Hari ini, Solvio melayani ribuan keluarga di seluruh Indonesia,
+                memberdayakan teknisi lokal dengan pekerjaan yang stabil sambil memberikan
+                ketenangan pikiran bagi para pemilik rumah.
               </p>
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Statistik */}
           <div className="grid grid-cols-2 gap-5">
-            {STATS.map((s) => (
+            {STATISTIK.map((s) => (
               <div
                 key={s.label}
                 className="bg-[#FDFCFB] rounded-2xl border border-stone-100 p-8"
@@ -126,17 +125,17 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Values */}
+      {/* Nilai-Nilai Kami */}
       <section className="px-8 py-20 bg-[#FDFCFB]">
         <div className="max-w-7xl mx-auto">
           <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-4 text-center">
-            Our Values
+            Nilai Kami
           </p>
           <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-normal text-[#1A1410] text-center mb-14">
-            Why Customers Choose Solvio
+            Mengapa Pelanggan Memilih Solvio
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TEAM_VALUES.map((v) => (
+            {NILAI_NILAI.map((v) => (
               <div
                 key={v.title}
                 className="bg-white rounded-2xl border border-stone-100 p-8 hover:shadow-[0_12px_40px_rgb(26,20,16,0.07)] hover:-translate-y-1 transition-all duration-300"
@@ -154,29 +153,29 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* Cara Kerja */}
       <section className="px-8 py-20 bg-white">
         <div className="max-w-7xl mx-auto">
           <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-4 text-center">
-            How It Works
+            Cara Kerja
           </p>
           <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-normal text-[#1A1410] text-center mb-14">
-            From Booking to Done
+            Dari Pemesanan Hingga Selesai
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div key={step.step} className="relative">
-                {i < HOW_IT_WORKS.length - 1 && (
+            {CARA_KERJA.map((langkah, i) => (
+              <div key={langkah.step} className="relative">
+                {i < CARA_KERJA.length - 1 && (
                   <div className="hidden lg:block absolute top-8 left-[calc(100%-1rem)] w-[calc(100%-3rem)] h-px bg-[#EDE9E4]" />
                 )}
                 <div className="w-14 h-14 rounded-full bg-[#1A1410] flex items-center justify-center text-white text-[14px] font-semibold mb-6">
-                  {step.step}
+                  {langkah.step}
                 </div>
                 <h3 className="text-[17px] font-medium text-[#1A1410] mb-3">
-                  {step.title}
+                  {langkah.title}
                 </h3>
                 <p className="text-[14px] text-[#7A6E64] font-light leading-relaxed">
-                  {step.desc}
+                  {langkah.desc}
                 </p>
               </div>
             ))}
@@ -188,22 +187,22 @@ export default function AboutPage() {
       <section className="px-8 py-24 bg-[#1A1410] text-white">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-[clamp(2rem,4vw,3.2rem)] font-normal leading-tight mb-6">
-            Ready to experience{" "}
-            <span className="italic text-[#E4CFA8]">better home service?</span>
+            Siap merasakan{" "}
+            <span className="italic text-[#E4CFA8]">layanan rumah yang lebih baik?</span>
           </h2>
           <p className="text-[16px] text-white/60 font-light mb-10 leading-relaxed">
-            Join thousands of homeowners who trust Solvio for their home
-            maintenance needs. Book your first service today.
+            Bergabunglah dengan ribuan pemilik rumah yang mempercayakan perawatan
+            rumah mereka kepada Solvio. Pesan layanan pertama Anda hari ini.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/services">
               <Button size="lg" variant="outline">
-                Browse Services
+                Lihat Layanan
               </Button>
             </Link>
             <Link href="/register">
               <button className="px-8 py-3.5 text-[14px] font-semibold bg-[#B07D3E] text-white rounded-full hover:bg-[#9A6C31] transition-all duration-300">
-                Get Started Free
+                Mulai Gratis
               </button>
             </Link>
           </div>

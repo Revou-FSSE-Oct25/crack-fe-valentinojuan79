@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { Category, Service, ServiceVariant } from "@/types";
-import { Button } from "@/components/ui";
+import { Button, Badge } from "@/components/ui";
 
 const CATEGORY_ICONS: Record<string, string> = {
-  "AC": "❄️", "Listrik": "⚡", "Kebersihan": "🏠", "Pipa": "🔧",
-  "Elektronik": "💡", "Renovasi": "🔨",
+  AC: "❄️", Listrik: "⚡", Kebersihan: "🏠", Pipa: "🔧",
+  Elektronik: "💡", Renovasi: "🔨",
 };
 
 function formatPrice(n: number) {
@@ -23,7 +23,6 @@ function getCatIcon(name: string) {
   return "🔧";
 }
 
-
 interface ServiceModalProps {
   service: Service;
   onClose: () => void;
@@ -32,26 +31,19 @@ interface ServiceModalProps {
 
 function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
   const hasVariants = service.variants && service.variants.length > 0;
-  const [selectedVariant, setSelectedVariant] = useState<ServiceVariant | null>(
-    hasVariants ? null : null
-  );
+  const [selectedVariant, setSelectedVariant] = useState<ServiceVariant | null>(null);
 
-  const displayPrice = selectedVariant
-    ? selectedVariant.price
-    : service.price;
+  const displayPrice = selectedVariant ? selectedVariant.price : service.price;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal card */}
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 sm:animate-in sm:zoom-in-95">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-        {/* Icon header */}
         <div className="bg-gradient-to-br from-stone-50 to-stone-100 px-8 pt-10 pb-8 flex flex-col items-center text-center">
           <span className="text-6xl mb-4">
             {getCatIcon(service.category?.category_name || "")}
@@ -64,7 +56,6 @@ function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
           </h2>
         </div>
 
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 border border-stone-200 flex items-center justify-center text-stone-500 hover:bg-white hover:text-stone-900 transition-all text-sm"
@@ -72,9 +63,7 @@ function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
           ✕
         </button>
 
-        {/* Content */}
         <div className="px-6 py-6">
-
           {hasVariants ? (
             <>
               <p className="text-[12px] uppercase tracking-widest text-[#7A6E64] font-semibold mb-3">
@@ -113,7 +102,7 @@ function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
             <div className="flex items-center justify-between py-3 border-t border-[#F0EDE9] mb-5">
               <span className="text-[13px] text-[#7A6E64]">Harga</span>
               <span className="text-[22px] font-semibold text-[#1A1410]">
-                {formatPrice(service.price)}
+                {formatPrice(displayPrice)}
               </span>
             </div>
           )}
@@ -131,7 +120,6 @@ function ServiceModal({ service, onClose, onBook }: ServiceModalProps) {
     </div>
   );
 }
-
 
 export default function LayananPage() {
   const { user } = useAuth();
@@ -181,7 +169,7 @@ export default function LayananPage() {
     setFiltered(result);
   }, [activeCat, search, services]);
 
-  function handleBook(service: Service, variant?: ServiceVariant) {
+  const handleBook = useCallback((service: Service, variant?: ServiceVariant) => {
     if (!user) {
       router.push("/login");
       return;
@@ -189,7 +177,7 @@ export default function LayananPage() {
     const params = new URLSearchParams({ service_id: service.id });
     if (variant) params.set("variant_id", variant.id);
     router.push(`/bookings?${params.toString()}`);
-  }
+  }, [user, router]);
 
   if (loading) {
     return (
@@ -207,9 +195,8 @@ export default function LayananPage() {
       <div className="min-h-screen pt-[88px] pb-24 px-8">
         <div className="max-w-7xl mx-auto">
 
-          {/* Header */}
           <div className="mb-12">
-            <p className="text-[12px] uppercase tracking-[0.12em] text-[#B07D3E] font-semibold mb-3">Layanan Kami</p>
+            <Badge variant="accent" className="mb-3">Layanan Kami</Badge>
             <h1 className="text-[clamp(2rem,4vw,3rem)] font-normal text-[#1A1410] leading-tight mb-4">
               Semua Layanan Solvio
             </h1>
@@ -224,7 +211,6 @@ export default function LayananPage() {
             </div>
           )}
 
-          {/* Search + Filter */}
           <div className="flex flex-col md:flex-row gap-4 mb-10">
             <div className="relative flex-1">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C2B9AF]" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -266,7 +252,6 @@ export default function LayananPage() {
             </div>
           </div>
 
-          {/* Grid */}
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center py-24 text-center">
               <p className="text-5xl mb-5">🔍</p>
@@ -276,8 +261,8 @@ export default function LayananPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map((service) => {
-                const hasVariants = service.variants && service.variants.length > 0;
-                const minPrice = hasVariants
+                const hasV = service.variants && service.variants.length > 0;
+                const minPrice = hasV
                   ? Math.min(...service.variants!.map((v) => v.price))
                   : service.price;
 
@@ -288,7 +273,6 @@ export default function LayananPage() {
                     onClick={() => setModalService(service)}
                     className="text-left bg-white rounded-2xl border border-stone-100 hover:shadow-[0_12px_40px_rgb(26,20,16,0.09)] hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer"
                   >
-                    {/* Icon top */}
                     <div className="bg-gradient-to-br from-stone-50 to-stone-100 px-6 py-8 flex items-center justify-between">
                       <span className="text-4xl group-hover:scale-110 transition-transform duration-300">
                         {getCatIcon(service.category?.category_name || "")}
@@ -297,7 +281,7 @@ export default function LayananPage() {
                         <span className="text-[11px] font-medium text-[#7A6E64] bg-white px-3 py-1 rounded-full border border-stone-100">
                           {service.category?.category_name}
                         </span>
-                        {hasVariants && (
+                        {hasV && (
                           <span className="text-[10px] font-semibold text-[#B07D3E] bg-[#FDF6EE] px-2 py-0.5 rounded-full border border-[#EADCC8]">
                             {service.variants!.length} pilihan
                           </span>
@@ -305,12 +289,11 @@ export default function LayananPage() {
                       </div>
                     </div>
 
-                    {/* Content */}
                     <div className="p-6 flex flex-col flex-1">
                       <h3 className="text-[18px] font-normal text-[#1A1410] mb-1 leading-snug group-hover:text-[#B07D3E] transition-colors duration-200">
                         {service.services_name}
                       </h3>
-                      {hasVariants && (
+                      {hasV && (
                         <p className="text-[12px] text-[#7A6E64]">
                           {service.variants!.map((v) => v.variant_name).join(" · ")}
                         </p>
@@ -319,7 +302,7 @@ export default function LayananPage() {
                       <div className="mt-auto pt-5 border-t border-[#F0EDE9] flex items-center justify-between">
                         <div>
                           <p className="text-[10px] text-[#C2B9AF] uppercase tracking-widest font-medium mb-0.5">
-                            {hasVariants ? "Mulai dari" : "Harga"}
+                            {hasV ? "Mulai dari" : "Harga"}
                           </p>
                           <p className="text-[16px] font-semibold text-[#1A1410]">
                             {formatPrice(minPrice)}
@@ -338,7 +321,6 @@ export default function LayananPage() {
         </div>
       </div>
 
-      {/* Popup Modal */}
       {modalService && (
         <ServiceModal
           service={modalService}
