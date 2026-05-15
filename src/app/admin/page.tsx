@@ -33,6 +33,8 @@ type Tab = "bookings" | "services" | "categories";
 interface Technician extends User {
   assignedTasks?: { id: string }[];
   specialities?: string;
+  average_rating?: number | null;
+  review_count?: number;
 }
 
 interface BookingDrawerProps {
@@ -64,9 +66,15 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
   
 
   const sortedTechs = [...techsToShow].sort((a, b) => {
-    if (customerCity && a.city === customerCity && b.city !== customerCity) return -1;
-    if (customerCity && b.city === customerCity && a.city !== customerCity) return 1;
-    return 0;
+    // 1. Prioritas kota sama
+    const aCity = customerCity && a.city === customerCity;
+    const bCity = customerCity && b.city === customerCity;
+    if (aCity && !bCity) return -1;
+    if (bCity && !aCity) return 1;
+    // 2. Prioritas rating tertinggi
+    const aRating = a.average_rating ?? -1;
+    const bRating = b.average_rating ?? -1;
+    return bRating - aRating;
   });
 
   function handleSave() {
@@ -256,6 +264,18 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
                                 </p>
                               )}
                             </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              {(t.average_rating != null && t.average_rating !== undefined) ? (
+                                <>
+                                  <span className="text-amber-400 text-[11px]">{"★".repeat(Math.round(t.average_rating))}<span className={isSelected ? "text-white/20" : "text-stone-200"}>{"★".repeat(5 - Math.round(t.average_rating))}</span></span>
+                                  <span className={`text-[10px] font-semibold ml-0.5 ${isSelected ? "text-white/70" : "text-[#7A6E64]"}`}>
+                                    {t.average_rating.toFixed(1)} ({t.review_count} ulasan)
+                                  </span>
+                                </>
+                              ) : (
+                                <span className={`text-[10px] italic ${isSelected ? "text-white/40" : "text-[#C2B9AF]"}`}>Belum ada ulasan</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1">
@@ -388,7 +408,7 @@ function AdminBookings() {
     try {
       const [bkgs, techs] = await Promise.all([
         api.get<Booking[]>("/bookings"),
-        api.get<Technician[]>("/users/technicians"),
+        api.get<Technician[]>("/reviews/technicians"),
       ]);
       setBookings(bkgs);
       setTechnicians(techs);

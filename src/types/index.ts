@@ -50,6 +50,15 @@ export interface Payment {
   booking_id: string;
 }
 
+export interface Review {
+  id: string;
+  rating: number;
+  comment?: string;
+  booking_id: string;
+  technician_id: string;
+  createdAt: string;
+}
+
 export interface Booking {
   id: string;
   status: BookingStatus;
@@ -58,6 +67,7 @@ export interface Booking {
   address?: string;
   province?: string;
   city?: string;
+  proof_url?: string;
   user_id: string;
   user?: User;
   services_id: string;
@@ -65,4 +75,16 @@ export interface Booking {
   provider_id?: string;
   provider?: User;
   payment?: Payment;
+  review?: Review;
+}
+
+export interface TechnicianWithRating extends User {
+  average_rating: number | null;
+  review_count: number;
+  reviews: Array<{
+    rating: number;
+    comment?: string;
+    createdAt: string;
+    booking: { services: { services_name: string } };
+  }>;
 }
