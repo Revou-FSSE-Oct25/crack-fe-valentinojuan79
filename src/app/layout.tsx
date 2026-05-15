@@ -6,6 +6,9 @@ import { AuthProvider } from "@/lib/auth-context";
 export const metadata = {
   title: "Solvio — Servis Rumah Profesional",
   description: "Hubungkan dengan teknisi rumahan terpercaya, cepat, dan transparan.",
+  icons: {
+    icon: "/favicon.ico",
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

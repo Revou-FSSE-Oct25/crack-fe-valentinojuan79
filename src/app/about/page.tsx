@@ -28,7 +28,7 @@ const STATISTIK = [
   { value: "2.400+", label: "Pelanggan Aktif" },
   { value: "98%", label: "Tingkat Kepuasan" },
   { value: "150+", label: "Teknisi Terlatih" },
-  { value: "6", label: "Kota Layanan" },
+  { value: "50+", label: "Kota Layanan" },
 ];
 
 const CARA_KERJA = [
@@ -197,7 +197,7 @@ export default function TentangPage() {
             </Link>
             <Link href="/register">
               <button className="px-8 py-3.5 text-[14px] font-semibold bg-accent-500 text-white rounded-full hover:bg-[#9A6C31] transition-all duration-300">
-                Mulai Gratis
+                Mulai Bergabung
               </button>
             </Link>
           </div>

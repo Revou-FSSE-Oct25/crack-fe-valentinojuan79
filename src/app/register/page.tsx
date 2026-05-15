@@ -147,11 +147,14 @@ export default function RegisterPage() {
         <div className="absolute -top-20 right-[-80px] w-[420px] h-[420px] rounded-full bg-[#B07D3E] opacity-[0.07] blur-[90px] pointer-events-none" />
 
         <Link href="/" className="flex items-center gap-2.5 w-fit">
-          <span className="w-7 h-7 rounded-full bg-[#B07D3E] flex items-center justify-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-white" />
-          </span>
-          <span className="text-[18px] font-semibold tracking-[-0.02em] text-white">Solvio</span>
-        </Link>
+  <div className="bg-white w-10 h-10 flex items-center justify-center  rounded-full">
+    <img src="/logo.svg" alt="Solvio Logo" width={60} height={60} />
+  </div>
+
+  <span className="text-[18px] font-semibold tracking-[-0.02em] text-white">
+    Solvio
+  </span>
+</Link>
 
         <div className="space-y-10">
           <div>

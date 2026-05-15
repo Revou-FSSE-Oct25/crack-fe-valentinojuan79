@@ -39,10 +39,17 @@ function CompleteModal({ task, onClose, onSubmit, loading }: CompleteModalProps)
   const isCash = ["tunai", "cash"].includes(task.payment?.method?.toLowerCase() || "");
 
   function handleSubmit() {
-    if (!proofUrl.trim()) { alert("URL bukti pengerjaan tidak boleh kosong"); return; }
-    if (isCash && !cashConfirmed) { alert("Pastikan kamu sudah konfirmasi pembayaran tunai dari customer"); return; }
-    onSubmit(proofUrl.trim(), cashConfirmed);
+  if (!proofUrl.trim()) { alert("URL bukti pengerjaan tidak boleh kosong"); return; }
+  
+  const paymentAlreadySuccess = task.payment?.status === 'SUCCESS';
+  if (!isCash && !paymentAlreadySuccess && !cashConfirmed) {
+    alert("Pastikan kamu sudah konfirmasi pembayaran dari customer");
+    return;
   }
+  if (isCash && !cashConfirmed) { alert("Pastikan kamu sudah konfirmasi pembayaran tunai dari customer"); return; }
+  
+  onSubmit(proofUrl.trim(), cashConfirmed);
+}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -66,23 +73,37 @@ function CompleteModal({ task, onClose, onSubmit, loading }: CompleteModalProps)
           <p className="text-[11px] text-[#7A6E64] mt-1">Masukkan link foto/video hasil pengerjaan (Google Drive, Imgur, dll)</p>
         </div>
 
-        {isCash && (
-          <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <p className="text-[13px] font-semibold text-amber-800 mb-2">💵 Pembayaran Tunai</p>
-            <label className="flex items-start gap-2.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={cashConfirmed}
-                onChange={(e) => setCashConfirmed(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-amber-600 cursor-pointer"
-              />
-              <span className="text-[13px] text-amber-800">
-                Saya konfirmasi bahwa customer <strong>{task.user?.full_name}</strong> sudah membayar 
-                tunai sebesar <strong>{formatPrice(task.total_price)}</strong>
-              </span>
-            </label>
-          </div>
-        )}
+
+<div className={`mb-5 p-4 rounded-xl border ${
+  isCash 
+    ? 'bg-amber-50 border-amber-200' 
+    : 'bg-blue-50 border-blue-200'
+}`}>
+  <p className={`text-[13px] font-semibold mb-2 ${
+    isCash ? 'text-amber-800' : 'text-blue-800'
+  }`}>
+    {isCash ? '💵 Pembayaran Tunai' : '💳 Konfirmasi Pembayaran'}
+  </p>
+  <label className="flex items-start gap-2.5 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={cashConfirmed}
+      onChange={(e) => setCashConfirmed(e.target.checked)}
+      className={`mt-0.5 w-4 h-4 cursor-pointer ${
+        isCash ? 'accent-amber-600' : 'accent-blue-600'
+      }`}
+    />
+    <span className={`text-[13px] ${
+      isCash ? 'text-amber-800' : 'text-blue-800'
+    }`}>
+      {isCash
+        ? `Saya konfirmasi customer ${task.user?.full_name} sudah membayar tunai sebesar ${formatPrice(task.total_price)}`
+        : `Saya konfirmasi pembayaran ${task.payment?.method?.toUpperCase()} sebesar ${formatPrice(task.total_price)} sudah diterima (cek bukti transfer/screenshot dari customer)`
+      }
+    </span>
+  </label>
+</div>
+
 
         <div className="flex gap-3">
           <button

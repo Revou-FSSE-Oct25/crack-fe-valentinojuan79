@@ -307,8 +307,8 @@ function BookingDrawer({ booking: b, technicians, updating, onClose, onUpdateSta
                     onClick={() => setNewStatus(s)}
                     className={`px-3 py-2.5 rounded-xl border-2 text-[12px] font-medium transition-all ${
                       newStatus === s
-                        ? "border-[text-stone-900] bg-[text-stone-900] text-white"
-                        : "border-[border-stone-100] bg-white text-[text-stone-500] hover:border-[text-stone-300]"
+                        ? "border-stone-900 bg-stone-900 text-white"
+                        : "border-stone-100 bg-white text-stone-500 hover:border-stone-300"
                     }`}
                   >
                     {STATUS_LABEL[s]}
@@ -501,8 +501,8 @@ function AdminBookings() {
             onClick={() => setFilterStatus(s)}
             className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all ${
               filterStatus === s
-                ? "bg-[text-stone-900] text-white border-[text-stone-900]"
-                : "bg-white text-[text-stone-500] border-border-stone-200 hover:border-[text-stone-900]"
+                ? "bg-stone-900 text-white border-stone-900"
+                : "bg-white text-stone-500 border-stone-200 hover:border-stone-900"
             }`}
           >
             {s === "all" ? "Semua" : STATUS_LABEL[s as BookingStatus]}
@@ -707,9 +707,9 @@ function AdminServices() {
           <tbody>
             {services.map((svc) => (
               <tr key={svc.id} className="border-b border-[#F0EDE9] last:border-0 hover:bg-stone-25">
-                <td className="px-5 py-4 text-[14px] font-medium text-[text-stone-900]">{svc.services_name}</td>
+                <td className="px-5 py-4 text-[14px] font-medium text-stone-900">{svc.services_name}</td>
                 <td className="px-5 py-4">
-                  <span className="text-[12px] bg-stone-100 text-[text-stone-500] px-2.5 py-1 rounded-full">
+                  <span className="text-[12px] bg-stone-100 text-stone-500 px-2.5 py-1 rounded-full">
                     {svc.category?.category_name}
                   </span>
                 </td>

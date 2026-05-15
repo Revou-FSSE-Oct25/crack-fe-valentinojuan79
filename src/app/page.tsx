@@ -62,7 +62,7 @@ const STATS = [
   { value: "2.400+", label: "Pelanggan Aktif" },
   { value: "98%", label: "Tingkat Kepuasan" },
   { value: "150+", label: "Teknisi Terlatih" },
-  { value: "6", label: "Kota Layanan" },
+  { value: "50+", label: "Kota Layanan" },
 ];
 
 export default function HomePage() {
@@ -74,14 +74,14 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto w-full relative pt-24 pb-20">
           <div className="animate-fade-up">
-            <Badge variant="accent">Servis Rumah Terpercaya</Badge>
+            <Badge variant="accent">Maintenance Rumah Terpercaya</Badge>
           </div>
 
           <div className="mt-8 grid lg:grid-cols-2 gap-12 items-center animate-fade-up delay-75">
             <div>
               <h1 className="text-[clamp(2.8rem,5.5vw,5.5rem)] font-normal leading-[1.05] text-stone-900 tracking-[-0.025em]">
-                Servis Rumah<br />
-                <span className="italic text-accent-500">Kapan Saja.</span>
+                Panggil Kami<br />
+                <span className="italic text-accent-500">Solvio.</span>
               </h1>
               <p className="mt-6 text-[18px] text-stone-500 font-light leading-relaxed max-w-md">
                 Solvio menghubungkan Anda dengan teknisi rumahan profesional — cepat, transparan, dan terpercaya untuk semua kebutuhan perawatan rumah Anda.
